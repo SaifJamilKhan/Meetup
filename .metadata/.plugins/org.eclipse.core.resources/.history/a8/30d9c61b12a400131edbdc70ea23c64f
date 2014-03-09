@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Meet Up</string>
+    <string name="action_settings">Settings</string>
+    <string name="login">Login</string>
+    <string name="create_account">Create Account</string>
+    <string name="user_name_label">User Name</string>
+    <string name="password_label">Password</string>
+
+</resources>

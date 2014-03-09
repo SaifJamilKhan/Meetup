@@ -1,0 +1,40 @@
+package com.example.meetup;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+
+import com.example.meetup.R.id;
+
+public class CreateAccountActivity extends Activity {
+
+	@Override
+	public View onCreateView(String name, Context context, AttributeSet attrs) {
+		// TODO Auto-generated method stub
+		Button CreateAccountButton = (Button) findViewById(id.CreateAccount_button);
+		CreateAccountButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+			     new AlertDialog.Builder(CreateAccountActivity.this)
+			    .setTitle("Account exists")
+			    .setMessage("Well we dont actually know yet")
+			    .setPositiveButton(android.R.string.yes, new DiaCreateAccountterface.OnClickListener() {
+			        public void onClick(DiaCreateAccountterface dialog, int which) { 
+			            // continue with delete
+			        }
+			     })
+			    .setNegativeButton(android.R.string.no, new DiaCreateAccountterface.OnClickListener() {
+			        public void onClick(DiaCreateAccountterface dialog, int which) { 
+			            // do nothing
+			        }
+			     }).show();
+			}
+		});
+		return super.onCreateView(name, context, attrs);
+	}
+}

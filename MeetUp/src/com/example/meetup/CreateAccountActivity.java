@@ -1,15 +1,16 @@
 package com.example.meetup;
 
 import android.app.Activity;
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.meetup.R.id;
+import com.example.meetup.Utils.DialogUtil;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
@@ -22,38 +23,91 @@ public class CreateAccountActivity extends Activity {
 		setContentView(R.layout.activity_create_account);
 		Button createAccountButton = (Button) findViewById(id.create_account_button);
 		createAccountButton.setOnClickListener(new OnClickListener() {
-		TextView userNameText = (TextView) findViewById(id.create_account_username_text);
-		TextView passwordText = (TextView) findViewById(id.create_account_password_text);
-			
+			TextView userNameText = (TextView) findViewById(id.create_account_username_text);
+			TextView passwordText = (TextView) findViewById(id.create_account_password_text);
+			TextView emailText = (TextView) findViewById(id.create_account_email_text);
+
 			@Override
 			public void onClick(View v) {
+				if (!checkCreateValues()) {
+					return;
+				}
+				View loginSpinnerView = findViewById(id.overlay_spinner_layout);
+				loginSpinnerView.setVisibility(View.VISIBLE);
+
 				ParseUser user = new ParseUser();
 				user.setUsername(userNameText.getText().toString());
 				user.setPassword(passwordText.getText().toString());
-				user.setEmail("email@example.com");
-				  
+				user.setEmail(emailText.getText().toString());
 				// other fields can be set just like with ParseObject
 				user.put("phone", "650-555-0000");
-				  
+
 				user.signUpInBackground(new SignUpCallback() {
-				  public void done(ParseException e) {
-				    if (e == null) {
-				      // Hooray! Let them use the app now.
-				    } else {
-				      // Sign up didn't succeed. Look at the ParseException
-				      // to figure out what went wrong
-				    }
-				  }
+					View loginSpinnerView = findViewById(id.overlay_spinner_layout);
+
+					public void done(ParseException e) {
+						if (e == null) {
+							new AlertDialog.Builder(CreateAccountActivity.this)
+									.setTitle("Successfully created account")
+									.setMessage("Thank you")
+									.setPositiveButton(
+											android.R.string.ok,
+											new DialogInterface.OnClickListener() {
+												public void onClick(
+														DialogInterface dialog,
+														int which) {
+													// continue with delete
+												}
+											}).show();
+						} else {
+							if (e.getCode() == ParseException.USERNAME_TAKEN) {
+								DialogUtil.showOkDialog(
+										"Account already exists",
+										"Please retry",
+										CreateAccountActivity.this);
+							} else {
+								DialogUtil.showOkDialog("Error",
+										"Error: " + e.getMessage(),
+										CreateAccountActivity.this);// TODO
+																	// Change
+																	// before
+																	// release;
+
+							}
+						}
+						loginSpinnerView.setVisibility(View.GONE);
+
+					}
 				});
-				
+
 			}
+
 		});
 	}
-	
-	@Override
-	public View onCreateView(String name, Context context, AttributeSet attrs) {
-		return super.onCreateView(name, context, attrs);
+
+	private boolean checkCreateValues() {
+		TextView userNameText = (TextView) findViewById(id.create_account_username_text);
+		TextView passwordText = (TextView) findViewById(id.create_account_password_text);
+		TextView emailText = (TextView) findViewById(id.create_account_email_text);
+		if (!isEmailValid(emailText.getText())) {
+			DialogUtil.showOkDialog("Email invalid",
+					"Please check the email field", this);
+			return false;
+		}
+		if (userNameText.getText().length() < 3) {
+			DialogUtil.showOkDialog("User name too short",
+					"Your user name needs to be atleast 3 letters", this);
+			return false;
+		}
+		if (passwordText.getText().length() < 3) {
+			DialogUtil.showOkDialog("Password is too short",
+					"Your password needs to be atleast 3 letters", this);
+			return false;
+		}
+		return true;
 	}
-	
-	
+
+	boolean isEmailValid(CharSequence email) {
+		return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+	}
 }

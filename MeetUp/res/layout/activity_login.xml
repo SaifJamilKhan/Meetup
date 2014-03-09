@@ -1,0 +1,58 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity" >
+
+    <View
+        android:id="@+id/center_divider"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_centerInParent="true"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/login_username_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/center_divider"
+        android:layout_alignParentLeft="true"
+        android:text="@string/user_name_label" />
+
+    <EditText
+        android:id="@+id/login_username_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/center_divider"
+        android:layout_toRightOf="@id/login_username_label"
+        android:inputType="text" />
+
+    <TextView
+        android:id="@+id/login_password_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/center_divider"
+        android:text="@string/password_label" />
+
+    <EditText
+        android:id="@+id/login_password_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/login_username_text"
+        android:layout_centerHorizontal="true"
+        android:layout_toRightOf="@id/login_password_label"
+        android:inputType="textPassword" >
+    </EditText>
+
+    <Button
+        android:id="@+id/login_account_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/login_password_text"
+        android:layout_centerHorizontal="true"
+        android:text="@string/login" />
+
+    <include layout="@layout/loading_spinner"/>
+
+</RelativeLayout> <!-- style="@android:style/Widget.ProgressBar." -->

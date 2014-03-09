@@ -1,0 +1,70 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <View
+        android:id="@+id/center_divider"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_centerInParent="true"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:id="@+id/create_account_username_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:text="@string/user_name_label"
+        android:layout_above="@id/center_divider" />
+    
+    <EditText
+        android:id="@+id/create_account_username_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:layout_toRightOf="@id/create_account_username_label"
+        android:layout_above="@id/center_divider" />
+    
+    <TextView
+        android:id="@+id/create_account_email_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:text="@string/email_label"
+        android:layout_above="@id/create_account_username_text" />
+    
+    <EditText
+        android:id="@+id/create_account_email_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textEmailAddress"
+        android:layout_toRightOf="@id/create_account_email_label"
+        android:layout_above="@id/create_account_username_text" />
+    <TextView
+        android:id="@+id/create_account_password_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:text="@string/password_label"
+        android:layout_below="@id/center_divider" />
+    
+    <EditText
+        android:id="@+id/create_account_password_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/create_account_username_text"
+        android:layout_toRightOf="@id/create_account_password_label"
+        android:inputType="textPassword" >
+    </EditText>
+    
+    <Button
+        android:id="@+id/launch_create_account_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/create_account_password_text"
+        android:layout_centerHorizontal="true"
+        android:text="@string/create_account" />
+
+</RelativeLayout>
