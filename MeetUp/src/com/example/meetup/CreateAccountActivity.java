@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.meetup.R.id;
-import com.example.meetup.Utils.DialogUtil;
+import com.example.meetup.Utils.MiscUtil;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
@@ -61,12 +61,12 @@ public class CreateAccountActivity extends Activity {
 											}).show();
 						} else {
 							if (e.getCode() == ParseException.USERNAME_TAKEN) {
-								DialogUtil.showOkDialog(
+								MiscUtil.showOkDialog(
 										"Account already exists",
 										"Please retry",
 										CreateAccountActivity.this);
 							} else {
-								DialogUtil.showOkDialog("Error",
+								MiscUtil.showOkDialog("Error",
 										"Error: " + e.getMessage(),
 										CreateAccountActivity.this);// TODO
 																	// Change
@@ -90,17 +90,17 @@ public class CreateAccountActivity extends Activity {
 		TextView passwordText = (TextView) findViewById(id.create_account_password_text);
 		TextView emailText = (TextView) findViewById(id.create_account_email_text);
 		if (!isEmailValid(emailText.getText())) {
-			DialogUtil.showOkDialog("Email invalid",
+			MiscUtil.showOkDialog("Email invalid",
 					"Please check the email field", this);
 			return false;
 		}
 		if (userNameText.getText().length() < 3) {
-			DialogUtil.showOkDialog("User name too short",
+			MiscUtil.showOkDialog("User name too short",
 					"Your user name needs to be atleast 3 letters", this);
 			return false;
 		}
 		if (passwordText.getText().length() < 3) {
-			DialogUtil.showOkDialog("Password is too short",
+			MiscUtil.showOkDialog("Password is too short",
 					"Your password needs to be atleast 3 letters", this);
 			return false;
 		}
