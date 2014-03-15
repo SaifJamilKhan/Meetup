@@ -22,6 +22,7 @@ public class LoginActivity extends Activity {
 			public void onClick(View v) {
 				Intent myIntent = new Intent(LoginActivity.this, MapActivity.class);
 				LoginActivity.this.startActivity(myIntent);
+				LoginActivity.this.finish();
 //				TextView loginUserName = (TextView) findViewById(id.login_username_text);
 //				TextView loginPassword = (TextView) findViewById(id.login_password_text);
 //				View loginSpinnerView = findViewById(id.overlay_spinner_layout);
