@@ -45,13 +45,7 @@
         android:inputType="textPassword" >
     </EditText>
 
-    <Button
-        android:id="@+id/login_account_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/login_password_text"
-        android:layout_centerHorizontal="true"
-        android:text="@string/login" />
+
 
     <include layout="@layout/loading_spinner"/>
 

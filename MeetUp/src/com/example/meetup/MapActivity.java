@@ -13,13 +13,19 @@ import android.view.MenuItem;
 import com.example.meetup.Utils.MiscUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapActivity extends Activity {
 	private MapFragment mMapFragment;
 	private GoogleMap mMap;
+	private MarkerOptions mLongClickMarkerOptions;
+	private Marker mCurrentMapMarker;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +34,34 @@ public class MapActivity extends Activity {
 		mMapFragment = ((MapFragment) getFragmentManager().findFragmentById(
 				R.id.mapview));
 		mMap = mMapFragment.getMap();
+		mMap.setOnMapLongClickListener(new OnMapLongClickListener() {
+
+			@Override
+			public void onMapLongClick(LatLng point) {
+				addLocationMarker(point);
+			}
+		});
+
+		mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+			@Override
+			public void onInfoWindowClick(Marker marker) {
+				if (marker == mCurrentMapMarker) {
+
+				}
+			}
+		});
 		mMap.setMyLocationEnabled(true);
 		centerMapOnMyLocation();
+	}
+
+	private void addLocationMarker(LatLng point) {
+		if (mCurrentMapMarker != null) {
+			mCurrentMapMarker.remove();
+		}
+		mLongClickMarkerOptions = new MarkerOptions();
+		mLongClickMarkerOptions.title("Tap here to add event");
+		mLongClickMarkerOptions.position(point);
+		mCurrentMapMarker = mMap.addMarker(mLongClickMarkerOptions);
 	}
 
 	@Override
