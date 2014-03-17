@@ -6,7 +6,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,12 +13,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.MiscUtil;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphUser;
-import com.google.android.gms.plus.Account;
 import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -36,7 +35,7 @@ public class MainActivity extends Activity {
 		Parse.initialize(this, "0CJwfnob0Q5w0cUUKe63I4w2lfD85slKLYP6IjSN",
 				"fqYtQf9txZs0ji1w76WJGvYBnOP3qKA9yLdEuWj9");
 		ParseFacebookUtils.initialize("225423810986687");
-
+		DatabaseUtil.createDatabase(this);
 		// Fetch Facebook user info if the session is active
 		Session session = ParseFacebookUtils.getSession();
 		if (session != null && session.isOpened()) {
@@ -90,7 +89,9 @@ public class MainActivity extends Activity {
 
 							} catch (JSONException e) {
 							}
-							createGoogleUser();
+							DatabaseUtil.setUser(MainActivity.this, user
+									.getName().toString());
+							// createGoogleUser();
 							launchMapActivity();
 						} else if (response.getError() != null) {
 							MiscUtil.showOkDialog("Login Response Error",
@@ -111,21 +112,16 @@ public class MainActivity extends Activity {
 			@Override
 			public void done(ParseUser user, ParseException err) {
 				if (user == null) {
-					MiscUtil.showOkDialog("Failure i think", "",
-							MainActivity.this);
-				} else if (user.isNew()) {
-					MiscUtil.showOkDialog("Success", user.getUsername(),
-							MainActivity.this);
-					createGoogleUser();
-					launchMapActivity();
+					makeMeRequest();
 				} else if (err != null
 						&& err.equals(ParseException.CONNECTION_FAILED)) {
 					MiscUtil.showNoInternetConnectionDialog(MainActivity.this);
 				} else if (err != null) {
 					MiscUtil.showOkDialog("Error", err.getMessage(),
 							MainActivity.this);
+				} else {
+					makeMeRequest();
 				}
-
 				mLoadingSpinner.setVisibility(View.GONE);
 			}
 
@@ -138,8 +134,9 @@ public class MainActivity extends Activity {
 		// if (requestCode == REQUEST_CODE_FB) {
 		ParseFacebookUtils.finishAuthentication(requestCode, resultCode, data);
 		if (resultCode == Activity.RESULT_OK) {
-			createGoogleUser();
-			launchMapActivity();
+			// createGoogleUser();
+			// addUser();
+			// launchMapActivity();
 		}
 		// } else {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -148,11 +145,19 @@ public class MainActivity extends Activity {
 		mLoadingSpinner.setVisibility(View.GONE);
 	}
 
+	private void addUser() {
+		Session session = ParseFacebookUtils.getSession();
+	}
+
 	private void createGoogleUser() {
-		AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
-		// manager.addAccount("com, authTokenType, requiredFeatures,
-		// addAccountOptions, activity, callback, handler)
-		Account[] list = (Account[]) manager.getAccounts();
+		// TODO create google account and skip login if it exists
+		// final AccountManager accountMgr =
+		// AccountManager.get(MainActivity.this);
+		// accountMgr.addAccount(Constants.ACCOUNT_TYPE, null, null, null,
+		// MainActivity.this, null, null);
+		// for (int x = 0; x < accountMgr.getAccounts().length; x++) {
+		// Log.v("", "" + accountMgr.getAccounts()[x]);
+		// }
 	}
 
 	private void launchMapActivity() {
