@@ -36,11 +36,6 @@ public class MainActivity extends Activity {
 				"fqYtQf9txZs0ji1w76WJGvYBnOP3qKA9yLdEuWj9");
 		ParseFacebookUtils.initialize("225423810986687");
 		DatabaseUtil.createDatabase(this);
-		// Fetch Facebook user info if the session is active
-		Session session = ParseFacebookUtils.getSession();
-		if (session != null && session.isOpened()) {
-			makeMeRequest();
-		}
 
 		setContentView(R.layout.activity_main);
 		mLoadingSpinner = findViewById(R.id.overlay_spinner_layout);
@@ -50,8 +45,14 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				// Fetch Facebook user info if the session is active
+				Session session = ParseFacebookUtils.getSession();
+				if (session != null && session.isOpened()) {
+					makeMeRequest();
+				} else {
+					makeLoginThroughFacebookCall();
+				}
 				mLoadingSpinner.setVisibility(View.VISIBLE);
-				makeLoginThroughFacebookCall();
 			}
 		});
 
@@ -98,6 +99,8 @@ public class MainActivity extends Activity {
 									response.getError().getErrorMessage(),
 									MainActivity.this);
 						}
+
+						mLoadingSpinner.setVisibility(View.GONE);
 					}
 				});
 		request.executeAsync();
@@ -107,7 +110,7 @@ public class MainActivity extends Activity {
 	private void makeLoginThroughFacebookCall() {
 
 		List<String> permissions = Arrays.asList("basic_info", "user_about_me",
-				"user_relationships", "user_location");
+				"user_location", "read_friendlists");
 		ParseFacebookUtils.logIn(permissions, this, new LogInCallback() {
 			@Override
 			public void done(ParseUser user, ParseException err) {
@@ -116,13 +119,15 @@ public class MainActivity extends Activity {
 				} else if (err != null
 						&& err.equals(ParseException.CONNECTION_FAILED)) {
 					MiscUtil.showNoInternetConnectionDialog(MainActivity.this);
+					mLoadingSpinner.setVisibility(View.GONE);
 				} else if (err != null) {
 					MiscUtil.showOkDialog("Error", err.getMessage(),
 							MainActivity.this);
+
+					mLoadingSpinner.setVisibility(View.GONE);
 				} else {
 					makeMeRequest();
 				}
-				mLoadingSpinner.setVisibility(View.GONE);
 			}
 
 		});
@@ -143,21 +148,6 @@ public class MainActivity extends Activity {
 		// }
 
 		mLoadingSpinner.setVisibility(View.GONE);
-	}
-
-	private void addUser() {
-		Session session = ParseFacebookUtils.getSession();
-	}
-
-	private void createGoogleUser() {
-		// TODO create google account and skip login if it exists
-		// final AccountManager accountMgr =
-		// AccountManager.get(MainActivity.this);
-		// accountMgr.addAccount(Constants.ACCOUNT_TYPE, null, null, null,
-		// MainActivity.this, null, null);
-		// for (int x = 0; x < accountMgr.getAccounts().length; x++) {
-		// Log.v("", "" + accountMgr.getAccounts()[x]);
-		// }
 	}
 
 	private void launchMapActivity() {
