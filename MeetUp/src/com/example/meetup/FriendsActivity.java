@@ -17,14 +17,14 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.example.meetup.Utils.DatabaseUtil;
-import com.facebook.HttpMethod;
 import com.facebook.Request;
 import com.facebook.Request.GraphUserListCallback;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphObject;
 import com.facebook.model.GraphUser;
-import com.parse.ParseFacebookUtils;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 public class FriendsActivity extends Activity {
 
@@ -65,16 +65,6 @@ public class FriendsActivity extends Activity {
 		return planet;
 	}
 
-	private void requestFriendsList() {
-		/* make the API call */
-		new Request(ParseFacebookUtils.getSession(), "/{friendlist-id}", null,
-				HttpMethod.GET, new Request.Callback() {
-					public void onCompleted(Response response) {
-						/* handle the result */
-					}
-				}).executeAsync();
-	}
-
 	private void getFriends() {
 		Session activeSession = Session.getActiveSession();
 		if (activeSession.getState().isOpened()) {
@@ -98,14 +88,15 @@ public class FriendsActivity extends Activity {
 									Log.d("id", friend.getString("id"));
 									Log.d("firnes", friend.toString());
 									friendsList.add(createPlanet("name",
-											friend.getString("name")));
-									friendsList.add(createPlanet("name",
-											friend.getString("id")));
+											friend.getString("name")
+													+ "without app"));
+
 									// Log.d("pic_square",
 									// friend.getString("pic_square"));
 								}
 								simpleAdpt.notifyDataSetChanged();
-								mSpinner.setVisibility(View.GONE);
+								getFriendsThatHaveTheApp(users);
+								// mSpinner.setVisibility(View.GONE);
 							} catch (JSONException e) {
 								e.printStackTrace();
 							}
@@ -117,5 +108,36 @@ public class FriendsActivity extends Activity {
 			friendRequest.setParameters(params);
 			friendRequest.executeAsync();
 		}
+	}
+
+	private List<ParseObject> getFriendsThatHaveTheApp(List<GraphUser> users) {
+		try {
+
+			List<String> friendsList = new ArrayList<String>();
+			for (GraphUser user : users) {
+				friendsList.add(user.getId());
+			}
+
+			// Construct a ParseUser query that will find friends whose
+			// facebook IDs are contained in the current user's friend list.
+			ParseQuery friendQuery = ParseQuery.getUserQuery();
+			friendQuery.whereContainedIn("fbId", friendsList);
+
+			// findObjects will return a list of ParseUsers that are friends
+			// with
+			// the current user
+			List<ParseObject> friendUsers = friendQuery.find();
+			for (ParseObject user : friendUsers) {
+				this.friendsList.add(createPlanet("name",
+						user.getString("name") + "with app"));
+			}
+			simpleAdpt.notifyDataSetChanged();
+			mSpinner.setVisibility(View.GONE);
+
+			return friendUsers;
+		} catch (Exception e) {
+			return null;
+		}
+
 	}
 }

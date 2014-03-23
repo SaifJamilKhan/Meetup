@@ -3,9 +3,6 @@ package com.example.meetup;
 import java.util.Arrays;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -65,31 +62,38 @@ public class MainActivity extends Activity {
 					public void onCompleted(GraphUser user, Response response) {
 						if (user != null) {
 
-							JSONObject userProfile = new JSONObject();
-							try {
-								userProfile.put("facebookId", user.getId());
-								userProfile.put("name", user.getName());
-								if (user.getLocation().getProperty("name") != null) {
-									userProfile.put("location", (String) user
-											.getLocation().getProperty("name"));
-								}
-								if (user.getProperty("gender") != null) {
-									userProfile.put("gender",
-											(String) user.getProperty("gender"));
-								}
-								if (user.getBirthday() != null) {
-									userProfile.put("birthday",
-											user.getBirthday());
-								}
-								if (user.getProperty("relationship_status") != null) {
-									userProfile
-											.put("relationship_status",
-													(String) user
-															.getProperty("relationship_status"));
-								}
+							ParseUser.getCurrentUser()
+									.put("fbId", user.getId());
+							ParseUser.getCurrentUser().put("name",
+									user.getName());
+							ParseUser.getCurrentUser().saveInBackground();
 
-							} catch (JSONException e) {
-							}
+							// JSONObject userProfile = new JSONObject();
+							// try {
+							// userProfile.put("facebookId", user.getId());
+							// if (user.getLocation().getProperty("name") !=
+							// null) {
+							// userProfile.put("location", (String) user
+							// .getLocation().getProperty("name"));
+							// }
+							// if (user.getProperty("gender") != null) {
+							// userProfile.put("gender",
+							// (String) user.getProperty("gender"));
+							// }
+							// if (user.getBirthday() != null) {
+							// userProfile.put("birthday",
+							// user.getBirthday());
+							// }
+							// if (user.getProperty("relationship_status") !=
+							// null) {
+							// userProfile
+							// .put("relationship_status",
+							// (String) user
+							// .getProperty("relationship_status"));
+							// }
+							//
+							// } catch (JSONException e) {
+							// }
 							DatabaseUtil.setUser(MainActivity.this, user
 									.getName().toString());
 							// createGoogleUser();
