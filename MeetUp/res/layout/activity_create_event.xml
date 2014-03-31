@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <EditText
+        android:id="@+id/eventNameText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:hint="Event Name"
+        android:padding="10dp" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/eventDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/eventNameText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="Event Description"
+        android:padding="10dp" >
+    </EditText>
+
+    <LinearLayout
+        android:id="@+id/timeLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/eventDescription"
+        android:gravity="center_horizontal"
+        android:weightSum="1.0" >
+
+        <EditText
+            android:id="@+id/datePickerText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/eventDescription"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:layout_weight="0.7"
+            android:focusable="false"
+            android:hint="Set Date"
+            android:padding="10dp" />
+
+        <EditText
+            android:id="@+id/timePickerText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/eventDescription"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@id/datePickerText"
+            android:layout_weight=".30"
+            android:focusable="false"
+            android:hint="Set Time"
+            android:padding="10dp" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/addressText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/timeLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:hint="Address" >
+    </EditText>
+
+    <EditText
+        android:id="@+id/friendsInvitedText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/addressText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:focusable="false"
+        android:hint="Click here to invite friends"
+        android:padding="10dp" />
+
+    <Button
+        android:id="@+id/createEventButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/friendsInvitedText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="25dp"
+        android:gravity="left|center_vertical"
+        android:text="Create Event"
+        android:textAlignment="0" />
+
+</RelativeLayout>

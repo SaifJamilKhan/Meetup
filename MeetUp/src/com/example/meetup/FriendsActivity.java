@@ -1,38 +1,40 @@
 package com.example.meetup;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.example.meetup.Utils.DatabaseUtil;
-import com.facebook.Request;
-import com.facebook.Request.GraphUserListCallback;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.model.GraphObject;
-import com.facebook.model.GraphUser;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
+import com.example.meetup.Utils.FacebookUtil;
 
-public class FriendsActivity extends Activity {
+public class FriendsActivity extends Activity implements Parcelable {
 
-	List<Map<String, String>> friendsList = new ArrayList<Map<String, String>>();
+	List<Map<String, String>> mFriendsList = new ArrayList<Map<String, String>>();
+	List<Map<String, String>> mSelectedFriends = new ArrayList<Map<String, String>>();
 
 	private SimpleAdapter simpleAdpt;
 
 	private View mSpinner;
+
+	public FriendsActivity(Parcel in) {
+		// TODO Auto-generated constructor stub
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,104 +42,163 @@ public class FriendsActivity extends Activity {
 		setContentView(R.layout.activity_friends);
 
 		initList();
-		getFriends();
+		FacebookUtil.getFriends(mFriendsList,
+				new FacebookUtil.FacebookEventListener() {
+
+					@Override
+					public void onFriendsListPopulated() {
+						simpleAdpt.notifyDataSetChanged();
+						mSpinner.setVisibility(View.GONE);
+					}
+				});
 		mSpinner = findViewById(R.id.overlay_spinner_layout);
 		mSpinner.setVisibility(View.VISIBLE);
-		simpleAdpt = new SimpleAdapter(this, friendsList,
-				android.R.layout.simple_list_item_1, new String[] { "name" },
-				new int[] { android.R.id.text1 });
+		simpleAdpt = new CustomAdapter(this, mFriendsList,
+				R.layout.friend_list_item, new String[] { "name" },
+				new int[] { R.id.friend_text });
 
 		ListView lv = (ListView) findViewById(R.id.friends_list_view);
-		lv.setAdapter(simpleAdpt);
+		lv.setOnItemClickListener(new OnItemClickListener() {
 
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View view,
+					int position, long arg3) {
+				View icon = view.findViewById(R.id.right_icon);
+				if (icon.getVisibility() == View.VISIBLE) {
+					deSelectFriend(position, icon);
+				} else {
+					selectFriend(position, icon);
+				}
+			}
+
+			private void selectFriend(int position, View icon) {
+				if (mFriendsList.get(position).get("name") != null
+						&& position != 0) {
+					icon.setVisibility(View.VISIBLE);
+					mSelectedFriends.add(mFriendsList.get(position));
+				}
+			}
+
+			private void deSelectFriend(int position, View icon) {
+				Object objectToRemove = mFriendsList.get(position);
+				if (objectToRemove != null && position != 0) {
+					icon.setVisibility(View.GONE);
+					mSelectedFriends.remove(objectToRemove);
+				}
+			}
+
+		});
+		lv.setAdapter(simpleAdpt);
 	}
 
 	private void initList() {
-		// We populate the planets
-		friendsList.add(createPlanet("name",
-				"" + DatabaseUtil.getCurrentUserName(this)));
-		friendsList.add(createPlanet("name", "Friends Without Meet Up"));
+		mFriendsList.add(FacebookUtil.createItem("name",
+				"" + DatabaseUtil.getCurrentUserName(this) + " (me)"));
+		mFriendsList.add(FacebookUtil.createItem("seperator",
+				"Friends With App"));
 	}
 
-	private HashMap<String, String> createPlanet(String key, String name) {
-		HashMap<String, String> planet = new HashMap<String, String>();
-		planet.put(key, name);
-		return planet;
-	}
+	class CustomAdapter extends SimpleAdapter {
+		Context context;
+		List<? extends Map<String, ?>> data;
+		private LayoutInflater inflater = null;
 
-	private void getFriends() {
-		Session activeSession = Session.getActiveSession();
-		if (activeSession.getState().isOpened()) {
-			Request friendRequest = Request.newMyFriendsRequest(activeSession,
-					new GraphUserListCallback() {
-						@Override
-						public void onCompleted(List<GraphUser> users,
-								Response response) {
-							try {
-								GraphObject graphObject = response
-										.getGraphObject();
-								JSONObject jsonObject = graphObject
-										.getInnerJSONObject();
+		public CustomAdapter(Context context,
+				List<? extends Map<String, ?>> data, int resource,
+				String[] from, int[] to) {
+			super(context, data, resource, from, to);
 
-								JSONArray array = jsonObject
-										.getJSONArray("data");
-								for (int i = 0; i < array.length(); i++) {
+			// TODO Auto-generated constructor stub
+			this.context = context;
+			this.data = data;
+			inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		}
 
-									JSONObject friend = array.getJSONObject(i);
+		@Override
+		public long getItemId(int position) {
+			// TODO Auto-generated method stub
+			return position;
+		}
 
-									Log.d("id", friend.getString("id"));
-									Log.d("firnes", friend.toString());
-									friendsList.add(createPlanet("name",
-											friend.getString("name")
-													+ "without app"));
-
-									// Log.d("pic_square",
-									// friend.getString("pic_square"));
-								}
-								simpleAdpt.notifyDataSetChanged();
-								getFriendsThatHaveTheApp(users);
-								// mSpinner.setVisibility(View.GONE);
-							} catch (JSONException e) {
-								e.printStackTrace();
-							}
-
-						}
-					});
-			Bundle params = new Bundle();
-			params.putString("fields", "id, name, picture");
-			friendRequest.setParameters(params);
-			friendRequest.executeAsync();
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			// TODO Auto-generated method stub
+			View vi = convertView;
+			if (vi == null)
+				vi = inflater.inflate(R.layout.friend_list_item, null);
+			TextView text = (TextView) vi.findViewById(R.id.friend_text);
+			if (text != null) {
+				if (data.get(position).get("name") == null) {
+					text.setBackgroundColor(Color.BLACK);
+					text.setText((CharSequence) data.get(position).get(
+							"seperator"));
+					text.setTextColor(Color.WHITE);
+				} else {
+					text.setText((CharSequence) data.get(position).get("name"));
+					text.setBackgroundColor(Color.WHITE);
+					text.setTextColor(Color.BLACK);
+				}
+			}
+			return vi;
 		}
 	}
 
-	private List<ParseObject> getFriendsThatHaveTheApp(List<GraphUser> users) {
-		try {
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
-			List<String> friendsList = new ArrayList<String>();
-			for (GraphUser user : users) {
-				friendsList.add(user.getId());
-			}
-
-			// Construct a ParseUser query that will find friends whose
-			// facebook IDs are contained in the current user's friend list.
-			ParseQuery friendQuery = ParseQuery.getUserQuery();
-			friendQuery.whereContainedIn("fbId", friendsList);
-
-			// findObjects will return a list of ParseUsers that are friends
-			// with
-			// the current user
-			List<ParseObject> friendUsers = friendQuery.find();
-			for (ParseObject user : friendUsers) {
-				this.friendsList.add(createPlanet("name",
-						user.getString("name") + "with app"));
-			}
-			simpleAdpt.notifyDataSetChanged();
-			mSpinner.setVisibility(View.GONE);
-
-			return friendUsers;
-		} catch (Exception e) {
-			return null;
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(mSelectedFriends.size());
+		for (int x = 0; x < mSelectedFriends.size(); x++) {
+			dest.writeString((String) mSelectedFriends.get(x).keySet()
+					.toArray()[0]);
+			dest.writeString((String) mSelectedFriends.get(x).get("name"));
 		}
 
+		dest.writeInt(mFriendsList.size());
+		for (int x = 0; x < mFriendsList.size(); x++) {
+			dest.writeString((String) mFriendsList.get(x).keySet().toArray()[0]);
+			dest.writeString((String) mFriendsList.get(x).get("name"));
+		}
+
+	}
+
+	public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+		public FriendsActivity createFromParcel(Parcel in) {
+			return new FriendsActivity(in);
+		}
+
+		public FriendsActivity[] newArray(int size) {
+			return new FriendsActivity[size];
+		}
+	};
+
+	// private FriendsActivity(Parcel in) {
+	//
+	// int sizeOfSelected = in.readInt();
+	// for (int i = 0; i < sizeOfSelected; i++) {
+	// String key = in.readString();
+	// String value = in.readString();
+	// mSelectedFriends.add(FacebookUtil.createItem(key, value));
+	// }
+	//
+	// int size = in.readInt();
+	// for (int i = 0; i < size; i++) {
+	// String key = in.readString();
+	// String value = in.readString();
+	// mFriendsList.add(FacebookUtil.createItem(key, value));
+	// }
+	// }
+
+	@Override
+	public void onBackPressed() {
+		Intent intent = getIntent();
+		intent.putExtra("friends", this);
+		setResult(Activity.RESULT_OK, intent);
+		super.onBackPressed();
 	}
 }

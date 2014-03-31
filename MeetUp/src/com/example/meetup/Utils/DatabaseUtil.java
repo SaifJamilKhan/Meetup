@@ -9,20 +9,33 @@ public class DatabaseUtil {
 
 	private static SQLiteDatabase mDatabase;
 	private static String mUserInfoTableName = "user_info";
+	private static String mEventsTableName = "events";
+
+	private static class EventTableColumns {
+		public static String name = "event_name";
+		public static String description = "event_description";
+		public static String address = "event_address";
+		public static String startDate = "start_date";
+		public static String endDate = "end_date";
+	}
 
 	public static void createDatabase(Context context) {
-
-		String Data = "";
 
 		/* Create a Database. */
 		try {
 			mDatabase = context.openOrCreateDatabase("MeetUp",
 					Context.MODE_PRIVATE, null);
 
-			/* Create a Table in the Database. */
+			/* Create User Table in the Database. */
 			mDatabase.execSQL("CREATE TABLE IF NOT EXISTS "
 					+ mUserInfoTableName
 					+ " (user_name VARCHAR, user_email VARCHAR);");
+
+			/* Create Event Table in the Database. */
+			mDatabase
+					.execSQL("CREATE TABLE IF NOT EXISTS "
+							+ mEventsTableName
+							+ " (event_name VARCHAR, event_description VARCHAR, event_address VARCHAR, start_date INTEGER, end_date INTEGER);");
 
 		} catch (Exception e) {
 			Log.e("Error", "Error", e);
@@ -50,6 +63,33 @@ public class DatabaseUtil {
 		}
 	}
 
+	public static void addEvent(Context context, String eventName,
+			String eventDescription, double startDate, double endDate,
+			String address) {
+
+		try {
+			mDatabase = context.openOrCreateDatabase("MeetUp",
+					Context.MODE_PRIVATE, null);
+
+			/* Insert data to a Table */
+			mDatabase.execSQL("INSERT INTO " + mEventsTableName + " [("
+					+ EventTableColumns.name + ","
+					+ EventTableColumns.description + ", "
+					+ EventTableColumns.startDate + ", "
+					+ EventTableColumns.endDate + ", "
+					+ EventTableColumns.address + ")]" + " VALUES ('"
+
+					+ eventName + ", " + eventDescription + ", " + startDate
+					+ ", " + endDate + ", " + address + ", " + "');");
+
+		} catch (Exception e) {
+			Log.e("Error", "Error", e);
+		} finally {
+			if (mDatabase != null)
+				mDatabase.close();
+		}
+	}
+
 	public static String getCurrentUserName(Context context) {
 		mDatabase = context.openOrCreateDatabase("MeetUp",
 				Context.MODE_PRIVATE, null);
@@ -64,8 +104,9 @@ public class DatabaseUtil {
 		if (c != null) {
 			// Loop through all Results
 			return c.getString(column);
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	public static String getCurrentUserEmail(Context context) {
@@ -80,8 +121,9 @@ public class DatabaseUtil {
 		if (c != null) {
 			// Loop through all Results
 			return c.getString(column);
+		} else {
+			return null;
 		}
-		return null;
 	}
 }
 

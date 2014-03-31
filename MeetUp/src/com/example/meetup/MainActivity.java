@@ -34,6 +34,13 @@ public class MainActivity extends Activity {
 		ParseFacebookUtils.initialize("225423810986687");
 		DatabaseUtil.createDatabase(this);
 
+		// Remove title bar
+		// this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+		// Remove notification bar
+		// this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+		// WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
 		setContentView(R.layout.activity_main);
 		mLoadingSpinner = findViewById(R.id.overlay_spinner_layout);
 		Button loginButton = (Button) findViewById(R.id.launch_login_button);
@@ -52,7 +59,10 @@ public class MainActivity extends Activity {
 				mLoadingSpinner.setVisibility(View.VISIBLE);
 			}
 		});
-
+		// Intent myIntent = new Intent(MainActivity.this,
+		// CreateEventActivity.class);
+		// MainActivity.this.startActivity(myIntent);
+		// finish();
 	}
 
 	private void makeMeRequest() {
