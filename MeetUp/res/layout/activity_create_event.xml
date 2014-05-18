@@ -11,13 +11,16 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
-        android:ems="10"
         android:hint="Event Name"
-        android:padding="10dp" >
+        android:padding="10dp" />
 
-        <requestFocus />
-    </EditText>
-
+   <!--  <include
+        android:id="@+id/eventNameView"
+        android:padding="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginTop="20dp"
+         layout="@layout/validation_text" /> -->
+    
     <EditText
         android:id="@+id/eventDescription"
         android:layout_width="match_parent"

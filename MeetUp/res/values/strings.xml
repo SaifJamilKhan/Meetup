@@ -24,4 +24,8 @@
     <string name="action_events">Events</string>
     <string name="action_settings">Settings</string>
     <string name="action_settings">Settings</string>
+    
+    <!-- Emojis -->
+    <string name="x">❌</string>
+    <string name="check_mark">︎✔︎︎</string>
 </resources>

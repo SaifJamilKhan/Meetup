@@ -1,5 +1,6 @@
 package com.example.meetup;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,6 +50,18 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				// ArrayList<Integer> sortMe = new ArrayList<Integer>();
+				// sortMe.add(1);
+				// sortMe.add(5);
+				// sortMe.add(10);
+				// sortMe.add(3);
+				// sortMe.add(7);
+				// sortMe.add(5);
+				// quickSort(sortMe, 0, sortMe.size() - 1);
+				// for (int x = 0; x < sortMe.size(); x++) {
+				// Log.v("saif", "" + sortMe.get(x));
+				// }
+				// return;
 				// Fetch Facebook user info if the session is active
 				Session session = ParseFacebookUtils.getSession();
 				if (session != null && session.isOpened()) {
@@ -63,6 +76,40 @@ public class MainActivity extends Activity {
 		// CreateEventActivity.class);
 		// MainActivity.this.startActivity(myIntent);
 		// finish();
+	}
+
+	// private ArrayList<Integer> quickSort(ArrayList<Integer> array, int left,
+	// int right) {
+	// if (left >= right)
+	// return array;
+	// int leftPosition = left + 1;
+	// int rightPosition = right;
+	//
+	// while (leftPosition <= rightPosition) {
+	// if (array.get(leftPosition) > array.get(left)) {
+	// while (rightPosition >= leftPosition) {
+	// if (array.get(rightPosition) < array.get(left)) {
+	// swap(leftPosition, rightPosition, array);
+	// break;
+	// }
+	// rightPosition--;
+	// }
+	// }
+	// leftPosition++;
+	// }
+	// swap(left, leftPosition - 1, array);
+	// quickSort(array, left, leftPosition - 2);
+	// quickSort(array, leftPosition, right);
+	//
+	// return array;
+	// }
+
+	private void swap(int a, int b, ArrayList<Integer> array) {
+		if (a == b)
+			return;
+		Integer x = array.get(a);
+		array.set(a, array.get(b));
+		array.set(b, x);
 	}
 
 	private void makeMeRequest() {

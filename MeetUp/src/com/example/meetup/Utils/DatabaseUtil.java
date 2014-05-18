@@ -1,5 +1,9 @@
 package com.example.meetup.Utils;
 
+import java.util.ArrayList;
+
+import meetup_objects.MeetUpEvent;
+import meetup_objects.MeetUpEvent.EventTableColumns;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,14 +14,6 @@ public class DatabaseUtil {
 	private static SQLiteDatabase mDatabase;
 	private static String mUserInfoTableName = "user_info";
 	private static String mEventsTableName = "events";
-
-	private static class EventTableColumns {
-		public static String name = "event_name";
-		public static String description = "event_description";
-		public static String address = "event_address";
-		public static String startDate = "start_date";
-		public static String endDate = "end_date";
-	}
 
 	public static void createDatabase(Context context) {
 
@@ -32,10 +28,12 @@ public class DatabaseUtil {
 					+ " (user_name VARCHAR, user_email VARCHAR);");
 
 			/* Create Event Table in the Database. */
-			mDatabase
-					.execSQL("CREATE TABLE IF NOT EXISTS "
-							+ mEventsTableName
-							+ " (event_name VARCHAR, event_description VARCHAR, event_address VARCHAR, start_date INTEGER, end_date INTEGER);");
+			mDatabase.execSQL("CREATE TABLE IF NOT EXISTS " + mEventsTableName
+					+ " (" + MeetUpEvent.EventTableColumns.name + " VARCHAR, "
+					+ MeetUpEvent.EventTableColumns.description + " VARCHAR, "
+					+ MeetUpEvent.EventTableColumns.address + " VARCHAR, "
+					+ MeetUpEvent.EventTableColumns.startDate + " INTEGER, "
+					+ MeetUpEvent.EventTableColumns.endDate + " INTEGER);");
 
 		} catch (Exception e) {
 			Log.e("Error", "Error", e);
@@ -64,29 +62,60 @@ public class DatabaseUtil {
 	}
 
 	public static void addEvent(Context context, String eventName,
-			String eventDescription, double startDate, double endDate,
-			String address) {
+			String eventDescription, double startDate, String address) {
 
 		try {
 			mDatabase = context.openOrCreateDatabase("MeetUp",
 					Context.MODE_PRIVATE, null);
 
 			/* Insert data to a Table */
-			mDatabase.execSQL("INSERT INTO " + mEventsTableName + " [("
+			mDatabase.execSQL("INSERT INTO " + mEventsTableName + " ("
 					+ EventTableColumns.name + ","
 					+ EventTableColumns.description + ", "
 					+ EventTableColumns.startDate + ", "
-					+ EventTableColumns.endDate + ", "
-					+ EventTableColumns.address + ")]" + " VALUES ('"
+					+ EventTableColumns.address + ")" + " VALUES ('"
 
 					+ eventName + ", " + eventDescription + ", " + startDate
-					+ ", " + endDate + ", " + address + ", " + "');");
+					+ ", " + address + "');");
 
 		} catch (Exception e) {
 			Log.e("Error", "Error", e);
 		} finally {
 			if (mDatabase != null)
 				mDatabase.close();
+		}
+	}
+
+	public static ArrayList<MeetUpEvent> getAllEvents(Context context) {
+		mDatabase = context.openOrCreateDatabase("MeetUp",
+				Context.MODE_PRIVATE, null);
+
+		Cursor c = mDatabase
+				.rawQuery("SELECT * FROM " + mEventsTableName, null);
+
+		ArrayList<MeetUpEvent> events = new ArrayList<MeetUpEvent>();
+
+		c.moveToFirst();
+		if (c != null) {
+			while (c.moveToNext()) {
+				String name = c.getString(c
+						.getColumnIndex(EventTableColumns.name));
+				String description = c.getString(c
+						.getColumnIndex(EventTableColumns.description));
+				String address = c.getString(c
+						.getColumnIndex(EventTableColumns.address));
+				String endDate = c.getString(c
+						.getColumnIndex(EventTableColumns.endDate));
+				String startDate = c.getString(c
+						.getColumnIndex(EventTableColumns.startDate));
+
+				MeetUpEvent event = new MeetUpEvent(name, description, address,
+						startDate, endDate);
+				events.add(event);
+			}
+			return events;
+		} else {
+			return null;
 		}
 	}
 
@@ -99,7 +128,6 @@ public class DatabaseUtil {
 
 		int column = c.getColumnIndex("user_name");
 
-		// Check if our result was valid.
 		c.moveToFirst();
 		if (c != null) {
 			// Loop through all Results
@@ -116,7 +144,6 @@ public class DatabaseUtil {
 
 		int column = c.getColumnIndex("user_email");
 
-		// Check if our result was valid.
 		c.moveToFirst();
 		if (c != null) {
 			// Loop through all Results

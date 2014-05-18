@@ -1,17 +1,18 @@
 package com.example.meetup.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import meetup_objects.MeetUpUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.facebook.Request;
 import com.facebook.Request.GraphUserListCallback;
@@ -19,11 +20,11 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphObject;
 import com.facebook.model.GraphUser;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 public class FacebookUtil {
-	public static void getFriends(final List<Map<String, String>> friendsList,
+	public static void getFriends(final HashMap<String, MeetUpUser> friends,
 			final FacebookEventListener listener) {
 
 		Session activeSession = Session.getActiveSession();
@@ -33,8 +34,6 @@ public class FacebookUtil {
 						@Override
 						public void onCompleted(List<GraphUser> users,
 								Response response) {
-							getFriendsThatHaveTheApp(users, friendsList,
-									listener);
 							try {
 								GraphObject graphObject = response
 										.getGraphObject();
@@ -43,19 +42,66 @@ public class FacebookUtil {
 
 								JSONArray array = jsonObject
 										.getJSONArray("data");
-								ArrayList<String> names = new ArrayList<String>();
-								for (int i = 0; i < array.length(); i++) {
-									JSONObject friend = array.getJSONObject(i);
-									names.add(friend.getString("name"));
+								// HashMap<String, MeetUpUser> friends = new
+								// HashMap<String, MeetUpUser>();
+								for (int x = 0; x < users.size(); x++) {
+									GraphUser gUser = users.get(x);
+									String id = gUser.getId();
+									String name = gUser.getName();
+									MeetUpUser user = new MeetUpUser(name, id);
+									friends.put(id, user);
+									Log.v("saif", "put id" + id);
 								}
-								Collections.sort(names,
-										String.CASE_INSENSITIVE_ORDER);
+								// for (int x = 0; x < array.length(); x++) {
+								// String id = ((JSONObject) array.get(x))
+								// .getString("fbId");
+								// String name = ((JSONObject) array.get(x))
+								// .getString("name");
+								// MeetUpUser user = new MeetUpUser(name, id);
+								// friends.put(id, user);
+								// Log.v("saif", "put id" + id);
+								// }
 
-								for (int x = 0; x < array.length(); x++) {
-									friendsList.add(createItem("name",
-											names.get(x)));
-								}
+								// ArrayList<String> names = new
+								// ArrayList<String>();
+								// for (int i = 0; i < array.length(); i++) {
+								// JSONObject friend = array.getJSONObject(i);
+								// names.add(friend.getString("name"));
+								// }
+								// Collections.sort(names,
+								// String.CASE_INSENSITIVE_ORDER);
 
+								// Collections.sort(names,
+								// new Comparator<JSONObject>() {
+								// public int compare(JSONObject b1,
+								// JSONObject b2) {
+								// return b1
+								// .getJSONObject(i)
+								// .toLowerCase()
+								// .compareTo(
+								// b2.getString(
+								// "name")
+								// .toLowerCase());
+								// }
+								// });
+
+								// for (int x = 0; x < array.length(); x++) {
+								// friendsList.add(createItem("name",
+								// names.get(x)));
+								//
+								// HashMap<String, String> friend = createItem(
+								// "name", names.get(x));
+								// friend.put(
+								// listToAdd.get(x).getString("fbId"),
+								// "fbId");
+								// Log.v("saif", "put id"
+								// + listToAdd.get(x)
+								// .getString("fbId"));
+								// friendsList.add(friend);
+								//
+								// }
+								getFriendsThatHaveTheApp(users, friends,
+										listener);
 							} catch (JSONException e) {
 								e.printStackTrace();
 							}
@@ -69,8 +115,8 @@ public class FacebookUtil {
 		}
 	}
 
-	public static List<ParseObject> getFriendsThatHaveTheApp(
-			List<GraphUser> users, final List<Map<String, String>> friendsList,
+	public static List<ParseUser> getFriendsThatHaveTheApp(
+			List<GraphUser> users, final HashMap<String, MeetUpUser> friends,
 			FacebookEventListener listener) {
 
 		List<String> friendsListIds = new ArrayList<String>();
@@ -88,17 +134,13 @@ public class FacebookUtil {
 			// findObjects will return a list of ParseUsers that are friends
 			// with
 			// the current user
-			List<ParseObject> friendUsers = friendQuery.find();
-			List<String> names = new ArrayList<String>();
-			for (ParseObject user : friendUsers) {
-				names.add(user.getString("name"));
-			}
-			Collections.sort(names, String.CASE_INSENSITIVE_ORDER);
+			List<ParseUser> friendUsers = friendQuery.find();
+			// List<String> names = new ArrayList<String>();
+			// for (ParseObject user : friendUsers) {
+			// names.add(user.getString("name"));
+			// }
 
-			for (int x = 0; x < names.size(); x++) {
-				friendsList.add(createItem("name", names.get(x)));
-			}
-			friendsList.add(createItem("seperator", "Friends Without App"));
+			addFriendsFromList(friends, friendUsers);
 			listener.onFriendsListPopulated();
 			return friendUsers;
 		} catch (Exception e) {
@@ -106,10 +148,38 @@ public class FacebookUtil {
 		}
 	}
 
-	public static HashMap<String, String> createItem(String key, String name) {
-		HashMap<String, String> planet = new HashMap<String, String>();
-		planet.put(key, name);
-		return planet;
+	private static void addFriendsFromList(
+			final HashMap<String, MeetUpUser> friends,
+			List<ParseUser> friendUsers) {
+		// Collections.sort(listToAdd, new Comparator<ParseObject>() {
+		// public int compare(ParseObject b1, ParseObject b2) {
+		// return b1.getString("name").toLowerCase()
+		// .compareTo(b2.getString("name").toLowerCase());
+		// }
+		// });
+
+		// Collections.sort(friendUsers.getString("name"),
+		// String.CASE_INSENSITIVE_ORDER);
+		// HashMap<String, MeetUpUser> friendsWithApp = new HashMap<String,
+		// MeetUpUser>();
+
+		for (int x = 0; x < friendUsers.size(); x++) {
+			// MeetUpUser user = new MeetUpUser(
+			// listToAdd.get(x).getString("name"), listToAdd.get(x)
+			// .getString("fbid"));
+			String id = (String) friendUsers.get(x).getString("fbId");
+			if (friends.containsKey(id)) {
+				friends.get(id).setHasApp(true);
+			}
+			// friendsWithApp.put(listToAdd.get(x).getString("fbid"), user);
+			//
+			// HashMap<String, String> friend = createItem("name", listToAdd
+			// .get(x).getString("name"));
+			// friend.put(listToAdd.get(x).getString("fbId"), "fbId");
+			// Log.v("saif", "put id" + listToAdd.get(x).getString("fbId"));
+			// friends.add(friend);
+		}
+
 	}
 
 	public interface FacebookEventListener extends EventListener {

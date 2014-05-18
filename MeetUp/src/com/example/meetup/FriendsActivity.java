@@ -1,8 +1,15 @@
 package com.example.meetup;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import meetup_objects.MeetUpUser;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,7 +17,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,10 +29,11 @@ import android.widget.TextView;
 import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.FacebookUtil;
 
-public class FriendsActivity extends Activity implements Parcelable {
+public class FriendsActivity extends Activity {
 
-	List<Map<String, String>> mFriendsList = new ArrayList<Map<String, String>>();
-	List<Map<String, String>> mSelectedFriends = new ArrayList<Map<String, String>>();
+	ArrayList<Map<String, String>> mFriendsList = new ArrayList<Map<String, String>>();
+	ArrayList<Map<String, String>> mSelectedFriends = new ArrayList<Map<String, String>>();
+	HashMap<String, MeetUpUser> mUserList = new HashMap<String, MeetUpUser>();
 
 	private SimpleAdapter simpleAdpt;
 
@@ -36,19 +43,66 @@ public class FriendsActivity extends Activity implements Parcelable {
 		// TODO Auto-generated constructor stub
 	}
 
+	public FriendsActivity() {
+
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_friends);
 
-		initList();
-		FacebookUtil.getFriends(mFriendsList,
+		FacebookUtil.getFriends(mUserList,
 				new FacebookUtil.FacebookEventListener() {
 
 					@Override
 					public void onFriendsListPopulated() {
+
+						populateFriendsArray(mUserList);
 						simpleAdpt.notifyDataSetChanged();
 						mSpinner.setVisibility(View.GONE);
+					}
+
+					private void populateFriendsArray(
+							HashMap<String, MeetUpUser> mUserList) {
+						Iterator<Entry<String, MeetUpUser>> it = mUserList
+								.entrySet().iterator();
+						ArrayList<Map<String, String>> mFriendsWithoutApp = new ArrayList<Map<String, String>>();
+						while (it.hasNext()) {
+							Map.Entry pairs = (Map.Entry) it.next();
+							MeetUpUser user = (MeetUpUser) pairs.getValue();
+							HashMap<String, String> userForList = createItem(
+									"name", user.getName());
+							userForList.put("fbid", user.getFacebookId());
+							if (user.hasApp()) {
+								mFriendsList.add(userForList);
+							} else {
+								mFriendsWithoutApp.add(userForList);
+							}
+						}
+						sortFriendList(mFriendsWithoutApp);
+						sortFriendList(mFriendsList);
+						mFriendsList.add(createItem("seperator",
+								"Friends Without App"));
+						mFriendsList.addAll(mFriendsWithoutApp);
+						addSeperators();
+
+					}
+
+					private void sortFriendList(
+							List<Map<String, String>> friendList) {
+						Collections.sort(friendList,
+								new Comparator<Map<String, String>>() {
+									public int compare(Map<String, String> b1,
+											Map<String, String> b2) {
+										return b1
+												.get("name")
+												.toLowerCase()
+												.compareTo(
+														b2.get("name")
+																.toLowerCase());
+									}
+								});
 					}
 				});
 		mSpinner = findViewById(R.id.overlay_spinner_layout);
@@ -64,6 +118,8 @@ public class FriendsActivity extends Activity implements Parcelable {
 			public void onItemClick(AdapterView<?> arg0, View view,
 					int position, long arg3) {
 				View icon = view.findViewById(R.id.right_icon);
+				if (icon == null)
+					return;
 				if (icon.getVisibility() == View.VISIBLE) {
 					deSelectFriend(position, icon);
 				} else {
@@ -91,11 +147,43 @@ public class FriendsActivity extends Activity implements Parcelable {
 		lv.setAdapter(simpleAdpt);
 	}
 
-	private void initList() {
-		mFriendsList.add(FacebookUtil.createItem("name",
-				"" + DatabaseUtil.getCurrentUserName(this) + " (me)"));
-		mFriendsList.add(FacebookUtil.createItem("seperator",
-				"Friends With App"));
+	// private int[] quickSort(int[] array, int left, int right) {
+	//
+	// if (left >= right) {
+	// return array;
+	// }
+	// int pivot = left;
+	//
+	// for (int x = left; x < (right - left); x++) {
+	// if (array[pivot] < array[x]) {
+	// for (int y = right; y > (right - x); y--) {
+	// if (array[pivot] > array[y]) {
+	// swap(x, y, array);
+	// swap(pivot, x, array);
+	//
+	// quickSort(array, x + 1, y - 1);
+	//
+	// }
+	// }
+	// }
+	//
+	// }
+	// return array;
+	// }
+	//
+	// void swap(int i, int j, int[] arr) {
+	// int t = arr[i];
+	// arr[i] = arr[j];
+	// arr[j] = t;
+	// }
+
+	private void addSeperators() {
+
+		mFriendsList.add(
+				0,
+				createItem("name", "" + DatabaseUtil.getCurrentUserName(this)
+						+ " (me)"));
+		mFriendsList.add(1, createItem("seperator", "Friends With App"));
 	}
 
 	class CustomAdapter extends SimpleAdapter {
@@ -135,6 +223,7 @@ public class FriendsActivity extends Activity implements Parcelable {
 							"seperator"));
 					text.setTextColor(Color.WHITE);
 				} else {
+
 					text.setText((CharSequence) data.get(position).get("name"));
 					text.setBackgroundColor(Color.WHITE);
 					text.setTextColor(Color.BLACK);
@@ -143,39 +232,6 @@ public class FriendsActivity extends Activity implements Parcelable {
 			return vi;
 		}
 	}
-
-	@Override
-	public int describeContents() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeInt(mSelectedFriends.size());
-		for (int x = 0; x < mSelectedFriends.size(); x++) {
-			dest.writeString((String) mSelectedFriends.get(x).keySet()
-					.toArray()[0]);
-			dest.writeString((String) mSelectedFriends.get(x).get("name"));
-		}
-
-		dest.writeInt(mFriendsList.size());
-		for (int x = 0; x < mFriendsList.size(); x++) {
-			dest.writeString((String) mFriendsList.get(x).keySet().toArray()[0]);
-			dest.writeString((String) mFriendsList.get(x).get("name"));
-		}
-
-	}
-
-	public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-		public FriendsActivity createFromParcel(Parcel in) {
-			return new FriendsActivity(in);
-		}
-
-		public FriendsActivity[] newArray(int size) {
-			return new FriendsActivity[size];
-		}
-	};
 
 	// private FriendsActivity(Parcel in) {
 	//
@@ -193,11 +249,17 @@ public class FriendsActivity extends Activity implements Parcelable {
 	// mFriendsList.add(FacebookUtil.createItem(key, value));
 	// }
 	// }
+	public static HashMap<String, String> createItem(String key, String name) {
+		HashMap<String, String> planet = new HashMap<String, String>();
+		planet.put(key, name);
+		return planet;
+	}
 
 	@Override
 	public void onBackPressed() {
+		FacebookUsersList friends = new FacebookUsersList(mSelectedFriends);
 		Intent intent = getIntent();
-		intent.putExtra("friends", this);
+		intent.putExtra("friends", friends);
 		setResult(Activity.RESULT_OK, intent);
 		super.onBackPressed();
 	}
