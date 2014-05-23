@@ -75,8 +75,8 @@ public class DatabaseUtil {
 					+ EventTableColumns.startDate + ", "
 					+ EventTableColumns.address + ")" + " VALUES ('"
 
-					+ eventName + ", " + eventDescription + ", " + startDate
-					+ ", " + address + "');");
+					+ eventName + "', '" + eventDescription + "', '"
+					+ startDate + "', '" + address + "' );");
 
 		} catch (Exception e) {
 			Log.e("Error", "Error", e);

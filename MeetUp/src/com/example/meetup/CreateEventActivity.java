@@ -9,6 +9,7 @@ import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.TimePickerDialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -84,12 +85,24 @@ public class CreateEventActivity extends Activity implements
 				if (!isFormValid()) {
 					return;
 				}
-
 				DatabaseUtil.addEvent(CreateEventActivity.this, mEventNameText
 						.getText().toString(), mEventDescription.getText()
 						.toString(),
 						(mDateTimeSinceInSeconds + mTimeTimeSinceInSeconds),
 						mAddressText.getText().toString());
+
+				MiscUtil.showOkDialog(
+						"Event created",
+						"Take me to that events page when that page is created, bitch",
+						CreateEventActivity.this,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								finish();
+							}
+						});
 			}
 
 		});
@@ -98,10 +111,11 @@ public class CreateEventActivity extends Activity implements
 
 		mAddressText = (EditText) findViewById(R.id.addressText);
 		Bundle bundle = getIntent().getExtras();
-		mAddressText.setText(bundle.getString("address"));
-		int latitude = bundle.getInt("lat");
-		int longitude = bundle.getInt("lon");
-
+		if (bundle != null) {
+			mAddressText.setText(bundle.getString("address"));
+			int latitude = bundle.getInt("lat");
+			int longitude = bundle.getInt("lon");
+		}
 		super.onCreate(savedInstanceState);
 	}
 

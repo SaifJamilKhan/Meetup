@@ -24,6 +24,13 @@ public class MiscUtil {
 						}).show();
 	}
 
+	public static void showOkDialog(String title, String message,
+			Context context,
+			android.content.DialogInterface.OnClickListener listener) {
+		new AlertDialog.Builder(context).setTitle(title).setMessage(message)
+				.setPositiveButton(android.R.string.ok, listener).show();
+	}
+
 	public static void showNoInternetConnectionDialog(final Context context) {
 		new AlertDialog.Builder(context)
 				.setTitle(getStringFromId(R.string.no_internet_title, context))

@@ -50,18 +50,8 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				// ArrayList<Integer> sortMe = new ArrayList<Integer>();
-				// sortMe.add(1);
-				// sortMe.add(5);
-				// sortMe.add(10);
-				// sortMe.add(3);
-				// sortMe.add(7);
-				// sortMe.add(5);
-				// quickSort(sortMe, 0, sortMe.size() - 1);
-				// for (int x = 0; x < sortMe.size(); x++) {
-				// Log.v("saif", "" + sortMe.get(x));
-				// }
-				// return;
+				// MiscUtil.launchActivity(CreateEventActivity.class, null,
+				// MainActivity.this);
 				// Fetch Facebook user info if the session is active
 				Session session = ParseFacebookUtils.getSession();
 				if (session != null && session.isOpened()) {
