@@ -17,15 +17,47 @@ public class MeetUpEvent {
 
 	public MeetUpEvent(String name, String description, String address,
 			String startDate, String endDate) {
-		mName = name;
-		mDescription = description;
-		mAddress = address;
-		mStartDate = startDate;
+		setName(name);
+		setDescription(description);
+		setAddress(address);
+		setStartDate(startDate);
 		mEndDate = endDate;
 	}
 
 	public String getEndDate() {
 		return mEndDate;
+	}
+
+	public String getName() {
+		return mName;
+	}
+
+	public void setName(String mName) {
+		this.mName = mName;
+	}
+
+	public String getDescription() {
+		return mDescription;
+	}
+
+	public void setDescription(String mDescription) {
+		this.mDescription = mDescription;
+	}
+
+	public String getAddress() {
+		return mAddress;
+	}
+
+	public void setAddress(String mAddress) {
+		this.mAddress = mAddress;
+	}
+
+	public String getStartDate() {
+		return mStartDate;
+	}
+
+	public void setStartDate(String mStartDate) {
+		this.mStartDate = mStartDate;
 	}
 
 }

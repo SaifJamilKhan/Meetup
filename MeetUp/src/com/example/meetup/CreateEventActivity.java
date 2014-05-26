@@ -113,8 +113,8 @@ public class CreateEventActivity extends Activity implements
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
 			mAddressText.setText(bundle.getString("address"));
-			int latitude = bundle.getInt("lat");
-			int longitude = bundle.getInt("lon");
+			// int latitude = bundle.getInt("lat");
+			// int longitude = bundle.getInt("lon");
 		}
 		super.onCreate(savedInstanceState);
 	}

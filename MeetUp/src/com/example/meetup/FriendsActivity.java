@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import meetup_objects.MeetUpUser;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -186,7 +185,7 @@ public class FriendsActivity extends Activity {
 		mFriendsList.add(1, createItem("seperator", "Friends With App"));
 	}
 
-	class CustomAdapter extends SimpleAdapter {
+	private class CustomAdapter extends SimpleAdapter {
 		Context context;
 		List<? extends Map<String, ?>> data;
 		private LayoutInflater inflater = null;
@@ -196,7 +195,6 @@ public class FriendsActivity extends Activity {
 				String[] from, int[] to) {
 			super(context, data, resource, from, to);
 
-			// TODO Auto-generated constructor stub
 			this.context = context;
 			this.data = data;
 			inflater = (LayoutInflater) context

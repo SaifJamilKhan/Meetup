@@ -82,7 +82,7 @@ public class MapActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_events:
-			MiscUtil.launchActivity(EventActivity.class, null, this);
+			MiscUtil.launchActivity(EventsActivity.class, null, this);
 			break;
 		case R.id.action_friends:
 

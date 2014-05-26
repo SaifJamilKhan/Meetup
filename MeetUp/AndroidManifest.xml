@@ -60,7 +60,7 @@
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name="com.example.meetup.EventActivity"
+            android:name="com.example.meetup.EventsActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
