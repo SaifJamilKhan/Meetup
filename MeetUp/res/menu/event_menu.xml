@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_events"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_events"/>
+    <item
+        android:id="@+id/action_friends"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_friends"/>
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_settings"/>
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/background"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_events"/>
+
+</menu>

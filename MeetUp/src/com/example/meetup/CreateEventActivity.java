@@ -9,7 +9,6 @@ import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.TimePickerDialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +21,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
 
+import com.example.meetup.EventsActivity.EventAttributes;
 import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.MiscUtil;
 
@@ -91,18 +91,13 @@ public class CreateEventActivity extends Activity implements
 						(mDateTimeSinceInSeconds + mTimeTimeSinceInSeconds),
 						mAddressText.getText().toString());
 
-				MiscUtil.showOkDialog(
-						"Event created",
-						"Take me to that events page when that page is created, bitch",
-						CreateEventActivity.this,
-						new DialogInterface.OnClickListener() {
-
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								finish();
-							}
-						});
+				Bundle bundle = new Bundle();
+				bundle.putString(EventAttributes.EVENT_NAME, mEventNameText
+						.getText().toString());
+				bundle.putString(EventAttributes.EVENT_DESCRIPTION,
+						mEventDescription.getText().toString());
+				MiscUtil.launchActivity(EventDetailsActivity.class, bundle,
+						CreateEventActivity.this);
 			}
 
 		});

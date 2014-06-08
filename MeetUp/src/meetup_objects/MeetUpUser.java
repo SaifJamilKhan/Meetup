@@ -1,8 +1,14 @@
 package meetup_objects;
 
 public class MeetUpUser {
-	private String mFacebookId;
+	public static class UserTableColumns {
+		public static String name = "user_name";
+		public static String facebookID = "facebook_id";
+		public static String hasApp = "has_app";
+	}
+
 	private String mName;
+	private String mFacebookId;
 	private boolean mHasApp;
 
 	public MeetUpUser(String name, String facebookId) {

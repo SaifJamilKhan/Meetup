@@ -15,7 +15,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,12 +37,8 @@ public class FriendsActivity extends Activity {
 
 	private View mSpinner;
 
-	public FriendsActivity(Parcel in) {
-		// TODO Auto-generated constructor stub
-	}
-
-	public FriendsActivity() {
-
+	public static class FriendsHashKeys {
+		public static String FB_ID = "fbid";
 	}
 
 	@Override
@@ -70,9 +65,10 @@ public class FriendsActivity extends Activity {
 						while (it.hasNext()) {
 							Map.Entry pairs = (Map.Entry) it.next();
 							MeetUpUser user = (MeetUpUser) pairs.getValue();
-							HashMap<String, String> userForList = createItem(
+							HashMap<String, String> userForList = createHashmap(
 									"name", user.getName());
-							userForList.put("fbid", user.getFacebookId());
+							userForList.put(FriendsHashKeys.FB_ID,
+									user.getFacebookId());
 							if (user.hasApp()) {
 								mFriendsList.add(userForList);
 							} else {
@@ -81,7 +77,7 @@ public class FriendsActivity extends Activity {
 						}
 						sortFriendList(mFriendsWithoutApp);
 						sortFriendList(mFriendsList);
-						mFriendsList.add(createItem("seperator",
+						mFriendsList.add(createHashmap("seperator",
 								"Friends Without App"));
 						mFriendsList.addAll(mFriendsWithoutApp);
 						addSeperators();
@@ -180,13 +176,12 @@ public class FriendsActivity extends Activity {
 
 		mFriendsList.add(
 				0,
-				createItem("name", "" + DatabaseUtil.getCurrentUserName(this)
-						+ " (me)"));
-		mFriendsList.add(1, createItem("seperator", "Friends With App"));
+				createHashmap("name",
+						"" + DatabaseUtil.getCurrentUserName(this) + " (me)"));
+		mFriendsList.add(1, createHashmap("seperator", "Friends With App"));
 	}
 
 	private class CustomAdapter extends SimpleAdapter {
-		Context context;
 		List<? extends Map<String, ?>> data;
 		private LayoutInflater inflater = null;
 
@@ -195,7 +190,6 @@ public class FriendsActivity extends Activity {
 				String[] from, int[] to) {
 			super(context, data, resource, from, to);
 
-			this.context = context;
 			this.data = data;
 			inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -247,7 +241,7 @@ public class FriendsActivity extends Activity {
 	// mFriendsList.add(FacebookUtil.createItem(key, value));
 	// }
 	// }
-	public static HashMap<String, String> createItem(String key, String name) {
+	public static HashMap<String, String> createHashmap(String key, String name) {
 		HashMap<String, String> planet = new HashMap<String, String>();
 		planet.put(key, name);
 		return planet;

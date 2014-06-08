@@ -9,7 +9,6 @@ public class FacebookUsersList implements Serializable {
 	ArrayList<Map<String, String>> mUsers = new ArrayList<Map<String, String>>();
 
 	public FacebookUsersList(ArrayList<Map<String, String>> users) {
-		// TODO Auto-generated constructor stub
 		mUsers = users;
 	}
 

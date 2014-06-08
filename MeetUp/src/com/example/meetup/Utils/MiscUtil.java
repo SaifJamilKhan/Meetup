@@ -69,5 +69,4 @@ public class MiscUtil {
 		}
 		context.startActivity(myIntent);
 	}
-
 }

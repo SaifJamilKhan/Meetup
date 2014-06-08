@@ -6,19 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import meetup_objects.MeetUpUser;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Bundle;
-import android.util.Log;
 
 import com.facebook.Request;
 import com.facebook.Request.GraphUserListCallback;
 import com.facebook.Response;
 import com.facebook.Session;
-import com.facebook.model.GraphObject;
 import com.facebook.model.GraphUser;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -35,13 +28,13 @@ public class FacebookUtil {
 						public void onCompleted(List<GraphUser> users,
 								Response response) {
 							try {
-								GraphObject graphObject = response
-										.getGraphObject();
-								JSONObject jsonObject = graphObject
-										.getInnerJSONObject();
-
-								JSONArray array = jsonObject
-										.getJSONArray("data");
+								// GraphObject graphObject = response
+								// .getGraphObject();
+								// JSONObject jsonObject = graphObject
+								// .getInnerJSONObject();
+								//
+								// JSONArray array = jsonObject
+								// .getJSONArray("data");
 								// HashMap<String, MeetUpUser> friends = new
 								// HashMap<String, MeetUpUser>();
 								for (int x = 0; x < users.size(); x++) {
@@ -50,7 +43,6 @@ public class FacebookUtil {
 									String name = gUser.getName();
 									MeetUpUser user = new MeetUpUser(name, id);
 									friends.put(id, user);
-									Log.v("saif", "put id" + id);
 								}
 								// for (int x = 0; x < array.length(); x++) {
 								// String id = ((JSONObject) array.get(x))
@@ -102,7 +94,7 @@ public class FacebookUtil {
 								// }
 								getFriendsThatHaveTheApp(users, friends,
 										listener);
-							} catch (JSONException e) {
+							} catch (Exception e) {
 								e.printStackTrace();
 							}
 

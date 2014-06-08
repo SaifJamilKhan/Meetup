@@ -1,6 +1,5 @@
 package com.example.meetup;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,9 +49,10 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				// MiscUtil.launchActivity(CreateEventActivity.class, null,
+				// MiscUtil.launchActivity(EventsActivity.class, null,
 				// MainActivity.this);
 				// Fetch Facebook user info if the session is active
+
 				Session session = ParseFacebookUtils.getSession();
 				if (session != null && session.isOpened()) {
 					makeMeRequest();
@@ -94,14 +94,6 @@ public class MainActivity extends Activity {
 	// return array;
 	// }
 
-	private void swap(int a, int b, ArrayList<Integer> array) {
-		if (a == b)
-			return;
-		Integer x = array.get(a);
-		array.set(a, array.get(b));
-		array.set(b, x);
-	}
-
 	private void makeMeRequest() {
 		Request request = Request.newMeRequest(ParseFacebookUtils.getSession(),
 				new Request.GraphUserCallback() {
@@ -114,33 +106,6 @@ public class MainActivity extends Activity {
 							ParseUser.getCurrentUser().put("name",
 									user.getName());
 							ParseUser.getCurrentUser().saveInBackground();
-
-							// JSONObject userProfile = new JSONObject();
-							// try {
-							// userProfile.put("facebookId", user.getId());
-							// if (user.getLocation().getProperty("name") !=
-							// null) {
-							// userProfile.put("location", (String) user
-							// .getLocation().getProperty("name"));
-							// }
-							// if (user.getProperty("gender") != null) {
-							// userProfile.put("gender",
-							// (String) user.getProperty("gender"));
-							// }
-							// if (user.getBirthday() != null) {
-							// userProfile.put("birthday",
-							// user.getBirthday());
-							// }
-							// if (user.getProperty("relationship_status") !=
-							// null) {
-							// userProfile
-							// .put("relationship_status",
-							// (String) user
-							// .getProperty("relationship_status"));
-							// }
-							//
-							// } catch (JSONException e) {
-							// }
 							DatabaseUtil.setUser(MainActivity.this, user
 									.getName().toString());
 							// createGoogleUser();

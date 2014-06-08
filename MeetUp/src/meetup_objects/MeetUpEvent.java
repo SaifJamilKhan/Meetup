@@ -3,6 +3,7 @@ package meetup_objects;
 public class MeetUpEvent {
 	public static class EventTableColumns {
 		public static String name = "event_name";
+		public static String id = "id";
 		public static String description = "event_description";
 		public static String address = "event_address";
 		public static String startDate = "start_date";
@@ -14,6 +15,7 @@ public class MeetUpEvent {
 	private String mAddress;
 	private String mStartDate;
 	private String mEndDate;
+	private String mID;
 
 	public MeetUpEvent(String name, String description, String address,
 			String startDate, String endDate) {
@@ -21,11 +23,15 @@ public class MeetUpEvent {
 		setDescription(description);
 		setAddress(address);
 		setStartDate(startDate);
-		mEndDate = endDate;
+		setEndDate(endDate);
 	}
 
 	public String getEndDate() {
 		return mEndDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.mEndDate = endDate;
 	}
 
 	public String getName() {
@@ -50,6 +56,14 @@ public class MeetUpEvent {
 
 	public void setAddress(String mAddress) {
 		this.mAddress = mAddress;
+	}
+
+	public String getID() {
+		return mID;
+	}
+
+	public void setID(String id) {
+		mID = id;
 	}
 
 	public String getStartDate() {

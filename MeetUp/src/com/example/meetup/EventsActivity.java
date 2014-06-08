@@ -6,10 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import meetup_objects.MeetUpEvent;
+import android.app.ActionBar;
+import android.app.ActionBar.Tab;
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,7 +26,7 @@ import android.widget.TextView;
 import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.MiscUtil;
 
-public class EventsActivity extends Activity {
+public class EventsActivity extends Activity implements ActionBar.TabListener {
 
 	private ArrayList<MeetUpEvent> mListOfEvents;
 	private CustomAdapter simpleAdpt;
@@ -37,6 +42,19 @@ public class EventsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_events);
+		ActionBar actionBar = getActionBar();
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+		ActionBar.Tab newTab0 = actionBar.newTab();
+		newTab0.setText("Tab 0 title");
+		newTab0.setTabListener(this);
+		ActionBar.Tab newTab1 = actionBar.newTab();
+		newTab1.setText("Tab 1 title");
+		newTab1.setTabListener(this);
+
+		actionBar.addTab(newTab0);
+		actionBar.addTab(newTab1);
+
 		mListOfEvents = new ArrayList<MeetUpEvent>();
 		mSpinner = findViewById(R.id.overlay_spinner_layout);
 		mEventsData = new ArrayList<HashMap<String, String>>();
@@ -45,6 +63,21 @@ public class EventsActivity extends Activity {
 				new String[] { EventAttributes.EVENT_NAME },
 				new int[] { R.id.event_title });
 
+		setUpListView();
+
+		getLocalEvents();
+		finishLoadingData();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu items for use in the action bar
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.event_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	private void setUpListView() {
 		ListView lv = (ListView) findViewById(R.id.events_list_view);
 		lv.setOnItemClickListener(new OnItemClickListener() {
 
@@ -63,9 +96,6 @@ public class EventsActivity extends Activity {
 			}
 		});
 		lv.setAdapter(simpleAdpt);
-
-		getLocalEvents();
-		finishLoadingData();
 	}
 
 	private class CustomAdapter extends SimpleAdapter {
@@ -118,6 +148,7 @@ public class EventsActivity extends Activity {
 			mEventsData.add(hash);
 		}
 	}
+
 	// private void getEvents() {
 	// /* make the API call */
 	// new Request(ParseFacebookUtils.getSession(), "/{event-id}", null,
@@ -129,4 +160,17 @@ public class EventsActivity extends Activity {
 	// }
 	// }).executeAsync();
 	// }
+
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+
+	}
+
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+	}
+
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+	}
 }

@@ -12,6 +12,7 @@
 
     <TextView
         android:id="@+id/event_name"
+        android:layout_marginLeft="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/event_name_label" />
@@ -25,9 +26,12 @@
 
     <TextView
         android:id="@+id/event_description"
+        android:layout_marginLeft="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/event_description_label" />
+        android:layout_toRightOf="@id/event_description_label" 
+        android:layout_below="@id/event_name_label"
+        />
 
     <TextView
         android:id="@+id/event_list_of_friends_invited_label"
@@ -38,8 +42,10 @@
 
     <TextView
         android:id="@+id/event_list_of_friends_invited"
+        android:layout_marginLeft="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/event_description_label"
         android:layout_toRightOf="@id/event_list_of_friends_invited_label" />
 
 </RelativeLayout>

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import meetup_objects.MeetUpEvent;
 import meetup_objects.MeetUpEvent.EventTableColumns;
+import meetup_objects.MeetUpUser;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,6 +15,8 @@ public class DatabaseUtil {
 	private static SQLiteDatabase mDatabase;
 	private static String mUserInfoTableName = "user_info";
 	private static String mEventsTableName = "events";
+	private static String mFriendsTableName = "friends";
+	private static String mFriendsInEventsTableName = "friends_in_events";
 
 	public static void createDatabase(Context context) {
 
@@ -30,10 +33,24 @@ public class DatabaseUtil {
 			/* Create Event Table in the Database. */
 			mDatabase.execSQL("CREATE TABLE IF NOT EXISTS " + mEventsTableName
 					+ " (" + MeetUpEvent.EventTableColumns.name + " VARCHAR, "
+					+ MeetUpEvent.EventTableColumns.id + " INTEGER, "
 					+ MeetUpEvent.EventTableColumns.description + " VARCHAR, "
 					+ MeetUpEvent.EventTableColumns.address + " VARCHAR, "
 					+ MeetUpEvent.EventTableColumns.startDate + " INTEGER, "
 					+ MeetUpEvent.EventTableColumns.endDate + " INTEGER);");
+
+			/* Create Friends Table in the Database. */
+			mDatabase.execSQL("CREATE TABLE IF NOT EXISTS " + mFriendsTableName
+					+ " (" + MeetUpUser.UserTableColumns.name + " VARCHAR, "
+					+ MeetUpUser.UserTableColumns.facebookID + " VARCHAR, "
+					+ MeetUpUser.UserTableColumns.hasApp + " BOOL);");
+
+			/* Create List of IDs Table used to store friend IDs. */
+			mDatabase.execSQL("CREATE TABLE IF NOT EXISTS "
+					+ mFriendsInEventsTableName + " ("
+					+ MeetUpUser.UserTableColumns.facebookID + " VARCHAR, "
+					+ MeetUpUser.UserTableColumns.facebookID + " VARCHAR, "
+					+ MeetUpUser.UserTableColumns.hasApp + " BOOL);");
 
 		} catch (Exception e) {
 			Log.e("Error", "Error", e);
@@ -43,6 +60,7 @@ public class DatabaseUtil {
 		}
 	}
 
+	// APP USER USERS --------------
 	public static void setUser(Context context, String name) {
 
 		try {
@@ -61,6 +79,37 @@ public class DatabaseUtil {
 		}
 	}
 
+	public static String getCurrentUserName(Context context) {
+		mDatabase = context.openOrCreateDatabase("MeetUp",
+				Context.MODE_PRIVATE, null);
+
+		Cursor c = mDatabase.rawQuery("SELECT * FROM " + mUserInfoTableName,
+				null);
+
+		if (c != null) {
+			int column = c.getColumnIndex("user_name");
+			c.moveToFirst();
+			// Loop through all Results
+			return c.getString(column);
+		} else {
+			return null;
+		}
+	}
+
+	public static String getCurrentUserEmail(Context context) {
+
+		Cursor c = mDatabase.rawQuery("SELECT * FROM " + mUserInfoTableName,
+				null);
+		if (c != null) {
+			int column = c.getColumnIndex("user_email");
+			c.moveToFirst();
+			return c.getString(column);
+		} else {
+			return null;
+		}
+	}
+
+	// EVENTS --------------
 	public static void addEvent(Context context, String eventName,
 			String eventDescription, double startDate, String address) {
 
@@ -93,10 +142,9 @@ public class DatabaseUtil {
 		Cursor c = mDatabase
 				.rawQuery("SELECT * FROM " + mEventsTableName, null);
 
-		ArrayList<MeetUpEvent> events = new ArrayList<MeetUpEvent>();
-
-		c.moveToFirst();
 		if (c != null) {
+			ArrayList<MeetUpEvent> events = new ArrayList<MeetUpEvent>();
+			c.moveToFirst();
 			while (c.moveToNext()) {
 				String name = c.getString(c
 						.getColumnIndex(EventTableColumns.name));
@@ -119,35 +167,33 @@ public class DatabaseUtil {
 		}
 	}
 
-	public static String getCurrentUserName(Context context) {
+	public static ArrayList<MeetUpEvent> getAllFriends(Context context) {
 		mDatabase = context.openOrCreateDatabase("MeetUp",
 				Context.MODE_PRIVATE, null);
 
-		Cursor c = mDatabase.rawQuery("SELECT * FROM " + mUserInfoTableName,
-				null);
+		Cursor c = mDatabase
+				.rawQuery("SELECT * FROM " + mEventsTableName, null);
 
-		int column = c.getColumnIndex("user_name");
-
-		c.moveToFirst();
 		if (c != null) {
-			// Loop through all Results
-			return c.getString(column);
-		} else {
-			return null;
-		}
-	}
+			ArrayList<MeetUpEvent> events = new ArrayList<MeetUpEvent>();
+			c.moveToFirst();
+			while (c.moveToNext()) {
+				String name = c.getString(c
+						.getColumnIndex(EventTableColumns.name));
+				String description = c.getString(c
+						.getColumnIndex(EventTableColumns.description));
+				String address = c.getString(c
+						.getColumnIndex(EventTableColumns.address));
+				String endDate = c.getString(c
+						.getColumnIndex(EventTableColumns.endDate));
+				String startDate = c.getString(c
+						.getColumnIndex(EventTableColumns.startDate));
 
-	public static String getCurrentUserEmail(Context context) {
-
-		Cursor c = mDatabase.rawQuery("SELECT * FROM " + mUserInfoTableName,
-				null);
-
-		int column = c.getColumnIndex("user_email");
-
-		c.moveToFirst();
-		if (c != null) {
-			// Loop through all Results
-			return c.getString(column);
+				MeetUpEvent event = new MeetUpEvent(name, description, address,
+						startDate, endDate);
+				events.add(event);
+			}
+			return events;
 		} else {
 			return null;
 		}
