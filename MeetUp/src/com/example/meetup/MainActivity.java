@@ -14,10 +14,8 @@ import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.MiscUtil;
 import com.facebook.Request;
 import com.facebook.Response;
-import com.facebook.Session;
 import com.facebook.model.GraphUser;
 import com.parse.LogInCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFacebookUtils;
 import com.parse.ParseUser;
@@ -29,9 +27,6 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Parse.initialize(this, "0CJwfnob0Q5w0cUUKe63I4w2lfD85slKLYP6IjSN",
-				"fqYtQf9txZs0ji1w76WJGvYBnOP3qKA9yLdEuWj9");
-		ParseFacebookUtils.initialize("225423810986687");
 		DatabaseUtil.createDatabase(this);
 
 		// Remove title bar
@@ -49,23 +44,21 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				// MiscUtil.launchActivity(EventsActivity.class, null,
-				// MainActivity.this);
-				// Fetch Facebook user info if the session is active
-
-				Session session = ParseFacebookUtils.getSession();
-				if (session != null && session.isOpened()) {
-					makeMeRequest();
-				} else {
-					makeLoginThroughFacebookCall();
-				}
-				mLoadingSpinner.setVisibility(View.VISIBLE);
+				MiscUtil.launchActivity(LoginActivity.class, null,
+						MainActivity.this);
 			}
 		});
-		// Intent myIntent = new Intent(MainActivity.this,
-		// CreateEventActivity.class);
-		// MainActivity.this.startActivity(myIntent);
-		// finish();
+
+		Button signUpButton = (Button) findViewById(R.id.launch_create_account_button);
+
+		signUpButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				MiscUtil.launchActivity(CreateAccountActivity.class, null,
+						MainActivity.this);
+			}
+		});
 	}
 
 	// private ArrayList<Integer> quickSort(ArrayList<Integer> array, int left,

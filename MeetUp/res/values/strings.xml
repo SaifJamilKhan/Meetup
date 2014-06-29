@@ -2,7 +2,8 @@
 <resources>
 
     <string name="app_name">Meet Up</string>
-    <string name="login_with_facebook">Login with Facebook</string>
+    <string name="login">Log In</string>
+    <string name="sign_up">Sign Up</string>
     <string name="main_screen_descriptor">To use this app you must sign in through Facebook.</string>
     <string name="create_account">Create Account</string>
     <string name="user_name_label">User Name</string>

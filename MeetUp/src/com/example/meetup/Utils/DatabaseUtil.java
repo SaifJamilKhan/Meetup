@@ -45,12 +45,12 @@ public class DatabaseUtil {
 					+ MeetUpUser.UserTableColumns.facebookID + " VARCHAR, "
 					+ MeetUpUser.UserTableColumns.hasApp + " BOOL);");
 
-			/* Create List of IDs Table used to store friend IDs. */
-			mDatabase.execSQL("CREATE TABLE IF NOT EXISTS "
-					+ mFriendsInEventsTableName + " ("
-					+ MeetUpUser.UserTableColumns.facebookID + " VARCHAR, "
-					+ MeetUpUser.UserTableColumns.facebookID + " VARCHAR, "
-					+ MeetUpUser.UserTableColumns.hasApp + " BOOL);");
+			// /* Create List of IDs Table used to store friend IDs. */
+			// mDatabase.execSQL("CREATE TABLE IF NOT EXISTS "
+			// + mFriendsInEventsTableName + " ("
+			// + MeetUpUser.UserTableColumns.facebookID + " VARCHAR, "
+			// + MeetUpUser.UserTableColumns.facebookID + " VARCHAR, "
+			// + MeetUpUser.UserTableColumns.hasApp + " BOOL);");
 
 		} catch (Exception e) {
 			Log.e("Error", "Error", e);

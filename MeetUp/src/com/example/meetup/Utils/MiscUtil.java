@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import com.example.meetup.R;
 
@@ -68,5 +70,13 @@ public class MiscUtil {
 			myIntent.putExtras(bundle);
 		}
 		context.startActivity(myIntent);
+	}
+
+	public static void requestFocusForTextView(EditText editText,
+			Context context) {
+		editText.requestFocus();
+		InputMethodManager imm = (InputMethodManager) context
+				.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
 	}
 }
