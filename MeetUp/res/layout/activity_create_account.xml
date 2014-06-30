@@ -1,72 +1,56 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent">
 
-    <View
-        android:id="@+id/center_divider"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:layout_centerInParent="true"
-        android:visibility="invisible" />
-
-    <TextView
-        android:id="@+id/create_account_username_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/center_divider"
-        android:layout_alignParentLeft="true"
-        android:text="@string/user_name_label" />
-
-    <EditText
-        android:id="@+id/create_account_username_text"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/center_divider"
-        android:layout_toRightOf="@id/create_account_username_label"
-        android:inputType="text" />
+        android:layout_centerVertical="true"
+        android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/create_account_email_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/create_account_username_text"
-        android:layout_alignParentLeft="true"
-        android:text="@string/email_label" />
+        <EditText
+            android:id="@+id/create_account_user_name_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/user_name"
+            android:text="somename"
+            android:inputType="text" />
+        
+        <EditText
+            android:id="@+id/create_account_email_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="saif@saif."
+            android:hint="@string/email"
+            android:inputType="textEmailAddress" />
 
-    <EditText
-        android:id="@+id/create_account_email_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/create_account_username_text"
-        android:layout_toRightOf="@id/create_account_email_label"
-        android:inputType="textEmailAddress" />
+        <EditText
+            android:id="@+id/create_account_password_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="password"
+            android:hint="@string/password"
+            android:inputType="textPassword" >
+        </EditText>
 
-    <TextView
-        android:id="@+id/create_account_password_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/center_divider"
-        android:text="@string/password_label" />
-
-    <EditText
-        android:id="@+id/create_account_password_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/create_account_username_text"
-        android:layout_centerHorizontal="true"
-        android:layout_toRightOf="@id/create_account_password_label"
-        android:inputType="textPassword" >
-    </EditText>
+        <EditText
+            android:id="@+id/create_account_password_confirm_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/confirm_password"
+            android:text="password"
+            android:inputType="textPassword" />
+    </LinearLayout>
 
     <Button
-        android:id="@+id/create_account_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/create_account_password_text"
-        android:layout_centerHorizontal="true"
-        android:text="@string/create_account" />
+        android:id="@+id/send_create_account_button"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:background="#014143"
+        android:text="@string/create_account"
+        android:textColor="#FFFFFF"
+        android:textSize="30sp" />
 
     <include layout="@layout/loading_spinner" />
 
