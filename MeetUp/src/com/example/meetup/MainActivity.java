@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,18 +24,13 @@ import com.parse.ParseUser;
 public class MainActivity extends Activity {
 
 	private View mLoadingSpinner;
+	private SharedPreferences mPreferences;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		DatabaseUtil.createDatabase(this);
-
-		// Remove title bar
-		// this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		// Remove notification bar
-		// this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-		// WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		mPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
 
 		setContentView(R.layout.activity_main);
 		mLoadingSpinner = findViewById(R.id.overlay_spinner_layout);
@@ -59,6 +55,16 @@ public class MainActivity extends Activity {
 						MainActivity.this);
 			}
 		});
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (mPreferences.contains("AuthToken")) {
+			MiscUtil.launchActivity(MapActivity.class, null, this);
+		} else {
+			// TODO: MAKE A FREAKING SPLASH SCREEN, ITS SUPER SIMPLE, DO IT
+		}
 	}
 
 	// private ArrayList<Integer> quickSort(ArrayList<Integer> array, int left,

@@ -17,7 +17,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class NetworkRequestUtil {
 	private static String baseUrl = "http://meet-up-server.herokuapp.com/";
@@ -48,19 +47,21 @@ public class NetworkRequestUtil {
 				post.setEntity(entity);
 				response = httpclient.execute(post);
 				StatusLine statusLine = response.getStatusLine();
-				if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+				if (statusLine.getStatusCode() == HttpStatus.SC_OK
+						|| statusLine.getStatusCode() == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
 					ByteArrayOutputStream out = new ByteArrayOutputStream();
 					response.getEntity().writeTo(out);
 					out.close();
 					responseString = out.toString();
 					try {
-						convertToJson(responseString);
+						JSONObject responseJSON = new JSONObject(responseString);
+						listener.requestSucceededWithJSON(responseJSON);
 					} catch (JSONException e) {
-						// TODO Auto-generated catch block
+						listener.requestFailed(e);
 						e.printStackTrace();
 					}
 				} else {
-					// Closes the connection.
+					listener.requestFailed(null);
 					response.getEntity().getContent().close();
 					throw new IOException(statusLine.getReasonPhrase());
 				}
@@ -81,20 +82,14 @@ public class NetworkRequestUtil {
 
 	public static interface NetworkRequestListener {
 
-		public abstract void requestSucceededWithJSON();
+		public abstract void requestSucceededWithJSON(JSONObject object);
 
-		public abstract void requestFailed();
+		public abstract void requestFailed(Exception e);
 	}
 
 	public static void makePostRequest(String path,
 			NetworkRequestListener listener, JSONObject body) {
 		RequestTask task = new RequestTask(listener, body);
 		task.execute(baseUrl + path);
-	}
-
-	public static void convertToJson(String responseString)
-			throws JSONException {
-		JSONObject jObject = new JSONObject(responseString);
-		Log.v("json", jObject.toString());
 	}
 }
