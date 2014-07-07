@@ -1,6 +1,14 @@
 package com.example.meetup;
 
+import network_clients.LoginClient;
+import network_clients.LoginClient.LoginClientListener;
+import network_clients.LoginClient.LoginResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -10,23 +18,27 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import com.example.meetup.Utils.MiscUtil;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends Activity implements LoginClientListener {
 
-	private EditText mUserNameEditText;
+	private EditText mUserEmailText;
 	private EditText mPasswordEditText;
 	private Button mLoginButton;
-	private View mLoadingSpinner;
+	private LoginClient mLoginClient;
+	private SharedPreferences mPreferences;
+	private View mSpinner;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
-		mLoadingSpinner = findViewById(R.id.overlay_spinner_layout);
-
-		mUserNameEditText = (EditText) findViewById(R.id.login_username_text);
+		mSpinner = findViewById(R.id.overlay_spinner_layout);
+		mLoginClient = LoginClient.getInstance();
+		mUserEmailText = (EditText) findViewById(R.id.login_email_text);
+		mPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
 
 		mPasswordEditText = (EditText) findViewById(R.id.login_password_text);
 		mPasswordEditText
@@ -50,10 +62,52 @@ public class LoginActivity extends Activity {
 			}
 		});
 
-		MiscUtil.requestFocusForTextView(mUserNameEditText, this);
+		MiscUtil.requestFocusForTextView(mUserEmailText, this);
 	}
 
 	private void login() {
-		mLoadingSpinner.setVisibility(View.VISIBLE);
+		mSpinner.setVisibility(View.VISIBLE);
+		JSONObject body = new JSONObject();
+		JSONObject user = new JSONObject();
+		try {
+			user.put("email", mUserEmailText.getText());
+			user.put("password", mPasswordEditText.getText());
+			body.put("user", user);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		mLoginClient.makeLoginCall(this, body);
+	}
+
+	@Override
+	public void requestSucceededWithResponse(final LoginResponse response) {
+		this.runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (response.isSuccess()) {
+					saveAccount(response);
+					MiscUtil.launchActivity(MapActivity.class, null,
+							LoginActivity.this);
+				} else {
+					Toast.makeText(LoginActivity.this, response.getError(),
+							Toast.LENGTH_LONG).show();
+				}
+				mSpinner.setVisibility(View.INVISIBLE);
+			}
+		});
+	}
+
+	private void saveAccount(LoginResponse response) {
+		SharedPreferences.Editor editor = mPreferences.edit();
+		editor.putString("AuthToken", response.getAuth_token());
+		editor.commit();
+	}
+
+	@Override
+	public void requestFailedWithError() {
+		mSpinner.setVisibility(View.INVISIBLE);
+		Toast.makeText(this, "Unexpected error, check internet!",
+				Toast.LENGTH_SHORT).show();
 	}
 }

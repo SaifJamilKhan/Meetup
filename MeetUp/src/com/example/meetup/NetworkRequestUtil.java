@@ -47,15 +47,21 @@ public class NetworkRequestUtil {
 				post.setEntity(entity);
 				response = httpclient.execute(post);
 				StatusLine statusLine = response.getStatusLine();
-				if (statusLine.getStatusCode() == HttpStatus.SC_OK
-						|| statusLine.getStatusCode() == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
-					ByteArrayOutputStream out = new ByteArrayOutputStream();
-					response.getEntity().writeTo(out);
-					out.close();
-					responseString = out.toString();
+				if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+					responseString = getResponseString(response);
 					try {
 						JSONObject responseJSON = new JSONObject(responseString);
 						listener.requestSucceededWithJSON(responseJSON);
+					} catch (JSONException e) {
+						listener.requestFailed(e);
+						e.printStackTrace();
+					}
+				} else if (statusLine.getStatusCode() == HttpStatus.SC_UNPROCESSABLE_ENTITY
+						|| statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+					responseString = getResponseString(response);
+					try {
+						JSONObject responseJSON = new JSONObject(responseString);
+						listener.requestFailedWithJSON(responseJSON);
 					} catch (JSONException e) {
 						listener.requestFailed(e);
 						e.printStackTrace();
@@ -73,6 +79,16 @@ public class NetworkRequestUtil {
 			return responseString;
 		}
 
+		private String getResponseString(HttpResponse response)
+				throws IOException {
+			String responseString;
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			response.getEntity().writeTo(out);
+			out.close();
+			responseString = out.toString();
+			return responseString;
+		}
+
 		@Override
 		protected void onPostExecute(String result) {
 			super.onPostExecute(result);
@@ -83,6 +99,8 @@ public class NetworkRequestUtil {
 	public static interface NetworkRequestListener {
 
 		public abstract void requestSucceededWithJSON(JSONObject object);
+
+		public abstract void requestFailedWithJSON(JSONObject object);
 
 		public abstract void requestFailed(Exception e);
 	}
