@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 import com.example.meetup.Utils.DatabaseUtil;
+import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.MiscUtil;
 import com.facebook.Request;
 import com.facebook.Response;
@@ -110,7 +111,7 @@ public class MainActivity extends Activity {
 							// createGoogleUser();
 							launchMapActivity();
 						} else if (response.getError() != null) {
-							MiscUtil.showOkDialog("Login Response Error",
+							DialogUtil.showOkDialog("Login Response Error",
 									response.getError().getErrorMessage(),
 									MainActivity.this);
 						}
@@ -133,10 +134,11 @@ public class MainActivity extends Activity {
 					makeMeRequest();
 				} else if (err != null
 						&& err.equals(ParseException.CONNECTION_FAILED)) {
-					MiscUtil.showNoInternetConnectionDialog(MainActivity.this);
+					DialogUtil
+							.showNoInternetConnectionDialog(MainActivity.this);
 					mLoadingSpinner.setVisibility(View.GONE);
 				} else if (err != null) {
-					MiscUtil.showOkDialog("Error", err.getMessage(),
+					DialogUtil.showOkDialog("Error", err.getMessage(),
 							MainActivity.this);
 
 					mLoadingSpinner.setVisibility(View.GONE);

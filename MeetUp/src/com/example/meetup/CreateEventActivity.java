@@ -23,6 +23,7 @@ import android.widget.TimePicker;
 
 import com.example.meetup.EventsActivity.EventAttributes;
 import com.example.meetup.Utils.DatabaseUtil;
+import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.MiscUtil;
 
 public class CreateEventActivity extends Activity implements
@@ -116,17 +117,17 @@ public class CreateEventActivity extends Activity implements
 
 	private boolean isFormValid() {
 		if (mEventNameText.getText().length() == 0) {
-			MiscUtil.showOkDialog("Invalid Event Name",
+			DialogUtil.showOkDialog("Invalid Event Name",
 					"You forgot to add an event name!", this);
 			return false;
 		}
 		if (mDatePickerText.getText().length() == 0) {
-			MiscUtil.showOkDialog("Invalid Date",
+			DialogUtil.showOkDialog("Invalid Date",
 					"You forgot to add a start date!", this);
 			return false;
 		}
 		if (mTimePickerText.getText().length() == 0) {
-			MiscUtil.showOkDialog("Invalid Time",
+			DialogUtil.showOkDialog("Invalid Time",
 					"You forgot to add a start time!", this);
 			return false;
 		}

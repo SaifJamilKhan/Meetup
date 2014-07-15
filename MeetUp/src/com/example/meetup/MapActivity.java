@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.GoogleMapsUtil;
 import com.example.meetup.Utils.MiscUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -105,7 +106,7 @@ public class MapActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		if (!MiscUtil.isOnline(this)) {
-			MiscUtil.showNoInternetConnectionDialog(this);
+			DialogUtil.showNoInternetConnectionDialog(this);
 		}
 	}
 

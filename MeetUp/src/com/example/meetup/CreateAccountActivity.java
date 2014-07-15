@@ -57,6 +57,8 @@ public class CreateAccountActivity extends Activity implements
 					user.put("password_confirmation",
 							mPasswordConfirmText.getText());
 					user.put("name", mUserNameText.getText());
+					user.put("phone_number", MiscUtil
+							.getDevicePhoneNumber(CreateAccountActivity.this));
 					body.put("user", user);
 				} catch (JSONException e) {
 					e.printStackTrace();
