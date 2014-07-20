@@ -117,8 +117,15 @@ public class CreateAccountActivity extends Activity implements
 
 	@Override
 	public void requestFailedWithError() {
-		mSpinner.setVisibility(View.INVISIBLE);
-		Toast.makeText(this, "Unexpected error, check internet!",
-				Toast.LENGTH_SHORT).show();
+		this.runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				mSpinner.setVisibility(View.INVISIBLE);
+				Toast.makeText(CreateAccountActivity.this,
+						"Unexpected error, check internet!", Toast.LENGTH_SHORT)
+						.show();
+			};
+		});
 	}
 }
