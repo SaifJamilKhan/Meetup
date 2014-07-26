@@ -28,15 +28,7 @@ public class FacebookUtil {
 						public void onCompleted(List<GraphUser> users,
 								Response response) {
 							try {
-								// GraphObject graphObject = response
-								// .getGraphObject();
-								// JSONObject jsonObject = graphObject
-								// .getInnerJSONObject();
-								//
-								// JSONArray array = jsonObject
-								// .getJSONArray("data");
-								// HashMap<String, MeetUpUser> friends = new
-								// HashMap<String, MeetUpUser>();
+
 								for (int x = 0; x < users.size(); x++) {
 									GraphUser gUser = users.get(x);
 									String id = gUser.getId();
@@ -44,54 +36,7 @@ public class FacebookUtil {
 									MeetUpUser user = new MeetUpUser(name, id);
 									friends.put(id, user);
 								}
-								// for (int x = 0; x < array.length(); x++) {
-								// String id = ((JSONObject) array.get(x))
-								// .getString("fbId");
-								// String name = ((JSONObject) array.get(x))
-								// .getString("name");
-								// MeetUpUser user = new MeetUpUser(name, id);
-								// friends.put(id, user);
-								// Log.v("saif", "put id" + id);
-								// }
 
-								// ArrayList<String> names = new
-								// ArrayList<String>();
-								// for (int i = 0; i < array.length(); i++) {
-								// JSONObject friend = array.getJSONObject(i);
-								// names.add(friend.getString("name"));
-								// }
-								// Collections.sort(names,
-								// String.CASE_INSENSITIVE_ORDER);
-
-								// Collections.sort(names,
-								// new Comparator<JSONObject>() {
-								// public int compare(JSONObject b1,
-								// JSONObject b2) {
-								// return b1
-								// .getJSONObject(i)
-								// .toLowerCase()
-								// .compareTo(
-								// b2.getString(
-								// "name")
-								// .toLowerCase());
-								// }
-								// });
-
-								// for (int x = 0; x < array.length(); x++) {
-								// friendsList.add(createItem("name",
-								// names.get(x)));
-								//
-								// HashMap<String, String> friend = createItem(
-								// "name", names.get(x));
-								// friend.put(
-								// listToAdd.get(x).getString("fbId"),
-								// "fbId");
-								// Log.v("saif", "put id"
-								// + listToAdd.get(x)
-								// .getString("fbId"));
-								// friendsList.add(friend);
-								//
-								// }
 								getFriendsThatHaveTheApp(users, friends,
 										listener);
 							} catch (Exception e) {
@@ -127,10 +72,6 @@ public class FacebookUtil {
 			// with
 			// the current user
 			List<ParseUser> friendUsers = friendQuery.find();
-			// List<String> names = new ArrayList<String>();
-			// for (ParseObject user : friendUsers) {
-			// names.add(user.getString("name"));
-			// }
 
 			addFriendsFromList(friends, friendUsers);
 			listener.onFriendsListPopulated();
