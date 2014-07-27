@@ -8,9 +8,9 @@ import com.example.meetup.NetworkRequestUtil.NetworkRequestListener;
 
 public class MURepository implements NetworkRequestListener {
 
-	private String path;
-
 	private static final HashMap<String, MURepository> instances = new HashMap<String, MURepository>();
+
+	private String path;
 
 	public enum SINGLETON_KEYS {
 		KFRIENDS("/friends");
@@ -26,13 +26,14 @@ public class MURepository implements NetworkRequestListener {
 	}
 
 	public static MURepository getSingleton(SINGLETON_KEYS key) {
-		if (instances.containsKey(key.toString())) {
-			return instances.get(key.toString());
+		MURepository repo;
+		if (instances.containsKey(key.getPath())) {
+			repo = instances.get(key.getPath());
 		} else {
-			MURepository repo = new MURepository(key.path);
+			repo = new MURepository(key.getPath());
+			instances.put(key.getPath(), repo);
 		}
-		return null;
-
+		return repo;
 	}
 
 	public MURepository(String path) {
@@ -49,12 +50,11 @@ public class MURepository implements NetworkRequestListener {
 	}
 
 	public void makeSyncRequest() {
-		// NetworkRequestUtil.makePostRequest(this.path, this);
+		NetworkRequestUtil.makePostRequest(this.path, this);
 	}
 
 	@Override
 	public void requestFailedWithJSON(JSONObject object) {
-		// TODO Auto-generated method stub
 
 	}
 

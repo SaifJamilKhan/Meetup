@@ -8,7 +8,8 @@ import org.json.JSONObject;
 import com.example.meetup.NetworkRequestUtil;
 import com.example.meetup.NetworkRequestUtil.NetworkRequestListener;
 
-public class CreateAccountClient implements NetworkRequestListener {
+public class CreateAccountClient extends MUNetworkClient implements
+		NetworkRequestListener {
 	private CreateAccountClientListener mListener;
 	private static CreateAccountClient instance;
 	private final String path = "registrations";

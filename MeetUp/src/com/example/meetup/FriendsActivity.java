@@ -36,6 +36,7 @@ public class FriendsActivity extends Activity {
 	private SimpleAdapter simpleAdpt;
 
 	private View mSpinner;
+	private MURepository repository;
 
 	public static class FriendsHashKeys {
 		public static String FB_ID = "fbid";
@@ -46,6 +47,55 @@ public class FriendsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_friends);
 
+		mSpinner = findViewById(R.id.overlay_spinner_layout);
+		mSpinner.setVisibility(View.VISIBLE);
+		repository = MURepository
+				.getSingleton(MURepository.SINGLETON_KEYS.KFRIENDS);
+		repository.makeSyncRequest();
+
+		simpleAdpt = new CustomAdapter(this, mFriendsList,
+				R.layout.friend_list_item, new String[] { "name" },
+				new int[] { R.id.friend_text });
+
+		ListView lv = (ListView) findViewById(R.id.friends_list_view);
+		lv.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View view,
+					int position, long arg3) {
+				View icon = view.findViewById(R.id.right_icon);
+				if (icon == null) {
+					return;
+				}
+
+				if (icon.getVisibility() == View.VISIBLE) {
+					deSelectFriend(position, icon);
+				} else {
+					selectFriend(position, icon);
+				}
+			}
+
+			private void selectFriend(int position, View icon) {
+				if (mFriendsList.get(position).get("name") != null
+						&& position != 0) {
+					icon.setVisibility(View.VISIBLE);
+					mSelectedFriends.add(mFriendsList.get(position));
+				}
+			}
+
+			private void deSelectFriend(int position, View icon) {
+				Object objectToRemove = mFriendsList.get(position);
+				if (objectToRemove != null && position != 0) {
+					icon.setVisibility(View.GONE);
+					mSelectedFriends.remove(objectToRemove);
+				}
+			}
+
+		});
+		lv.setAdapter(simpleAdpt);
+	}
+
+	private void makeFacebookFriendsRequest() {
 		FacebookUtil.getFriends(mUserList,
 				new FacebookUtil.FacebookEventListener() {
 
@@ -100,46 +150,6 @@ public class FriendsActivity extends Activity {
 								});
 					}
 				});
-		mSpinner = findViewById(R.id.overlay_spinner_layout);
-		mSpinner.setVisibility(View.VISIBLE);
-		simpleAdpt = new CustomAdapter(this, mFriendsList,
-				R.layout.friend_list_item, new String[] { "name" },
-				new int[] { R.id.friend_text });
-
-		ListView lv = (ListView) findViewById(R.id.friends_list_view);
-		lv.setOnItemClickListener(new OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View view,
-					int position, long arg3) {
-				View icon = view.findViewById(R.id.right_icon);
-				if (icon == null)
-					return;
-				if (icon.getVisibility() == View.VISIBLE) {
-					deSelectFriend(position, icon);
-				} else {
-					selectFriend(position, icon);
-				}
-			}
-
-			private void selectFriend(int position, View icon) {
-				if (mFriendsList.get(position).get("name") != null
-						&& position != 0) {
-					icon.setVisibility(View.VISIBLE);
-					mSelectedFriends.add(mFriendsList.get(position));
-				}
-			}
-
-			private void deSelectFriend(int position, View icon) {
-				Object objectToRemove = mFriendsList.get(position);
-				if (objectToRemove != null && position != 0) {
-					icon.setVisibility(View.GONE);
-					mSelectedFriends.remove(objectToRemove);
-				}
-			}
-
-		});
-		lv.setAdapter(simpleAdpt);
 	}
 
 	// private int[] quickSort(int[] array, int left, int right) {

@@ -19,7 +19,9 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 
 public class NetworkRequestUtil {
-	private static String baseUrl = "http://meet-up-server.herokuapp.com/";
+	// private static String baseUrl = "http://meet-up-server.herokuapp.com/";
+
+	private static String baseUrl = "http://192.168.0.10:3000/";
 
 	private static class RequestTask extends AsyncTask<String, String, String> {
 		NetworkRequestListener listener;
