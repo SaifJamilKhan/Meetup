@@ -14,13 +14,6 @@ import android.widget.Button;
 import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.MiscUtil;
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.model.GraphUser;
-import com.parse.LogInCallback;
-import com.parse.ParseException;
-import com.parse.ParseFacebookUtils;
-import com.parse.ParseUser;
 
 public class MainActivity extends Activity {
 
@@ -94,71 +87,71 @@ public class MainActivity extends Activity {
 	// return array;
 	// }
 
-	private void makeMeRequest() {
-		Request request = Request.newMeRequest(ParseFacebookUtils.getSession(),
-				new Request.GraphUserCallback() {
-					@Override
-					public void onCompleted(GraphUser user, Response response) {
-						if (user != null) {
+//	private void makeMeRequest() {
+//		Request request = Request.newMeRequest(ParseFacebookUtils.getSession(),
+//				new Request.GraphUserCallback() {
+//					@Override
+//					public void onCompleted(GraphUser user, Response response) {
+//						if (user != null) {
+//
+//							ParseUser.getCurrentUser()
+//									.put("fbId", user.getId());
+//							ParseUser.getCurrentUser().put("name",
+//									user.getName());
+//							ParseUser.getCurrentUser().saveInBackground();
+//							DatabaseUtil.setUser(MainActivity.this, user
+//									.getName().toString());
+//							// createGoogleUser();
+//							launchMapActivity();
+//						} else if (response.getError() != null) {
+//							DialogUtil.showOkDialog("Login Response Error",
+//									response.getError().getErrorMessage(),
+//									MainActivity.this);
+//						}
+//
+//						mLoadingSpinner.setVisibility(View.GONE);
+//					}
+//				});
+//		request.executeAsync();
+//
+//	}
 
-							ParseUser.getCurrentUser()
-									.put("fbId", user.getId());
-							ParseUser.getCurrentUser().put("name",
-									user.getName());
-							ParseUser.getCurrentUser().saveInBackground();
-							DatabaseUtil.setUser(MainActivity.this, user
-									.getName().toString());
-							// createGoogleUser();
-							launchMapActivity();
-						} else if (response.getError() != null) {
-							DialogUtil.showOkDialog("Login Response Error",
-									response.getError().getErrorMessage(),
-									MainActivity.this);
-						}
-
-						mLoadingSpinner.setVisibility(View.GONE);
-					}
-				});
-		request.executeAsync();
-
-	}
-
-	private void makeLoginThroughFacebookCall() {
-
-		List<String> permissions = Arrays.asList("basic_info", "user_about_me",
-				"user_location", "read_friendlists");
-		ParseFacebookUtils.logIn(permissions, this, new LogInCallback() {
-			@Override
-			public void done(ParseUser user, ParseException err) {
-				if (user == null) {
-					makeMeRequest();
-				} else if (err != null
-						&& err.equals(ParseException.CONNECTION_FAILED)) {
-					DialogUtil
-							.showNoInternetConnectionDialog(MainActivity.this);
-					mLoadingSpinner.setVisibility(View.GONE);
-				} else if (err != null) {
-					DialogUtil.showOkDialog("Error", err.getMessage(),
-							MainActivity.this);
-
-					mLoadingSpinner.setVisibility(View.GONE);
-				} else {
-					makeMeRequest();
-				}
-			}
-
-		});
-	}
+//	private void makeLoginThroughFacebookCall() {
+//
+//		List<String> permissions = Arrays.asList("basic_info", "user_about_me",
+//				"user_location", "read_friendlists");
+//		ParseFacebookUtils.logIn(permissions, this, new LogInCallback() {
+//			@Override
+//			public void done(ParseUser user, ParseException err) {
+//				if (user == null) {
+//					makeMeRequest();
+//				} else if (err != null
+//						&& err.equals(ParseException.CONNECTION_FAILED)) {
+//					DialogUtil
+//							.showNoInternetConnectionDialog(MainActivity.this);
+//					mLoadingSpinner.setVisibility(View.GONE);
+//				} else if (err != null) {
+//					DialogUtil.showOkDialog("Error", err.getMessage(),
+//							MainActivity.this);
+//
+//					mLoadingSpinner.setVisibility(View.GONE);
+//				} else {
+//					makeMeRequest();
+//				}
+//			}
+//
+//		});
+//	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO check result code
 		// if (requestCode == REQUEST_CODE_FB) {
-		ParseFacebookUtils.finishAuthentication(requestCode, resultCode, data);
+//		ParseFacebookUtils.finishAuthentication(requestCode, resultCode, data);
 		if (resultCode == Activity.RESULT_OK) {
 			// createGoogleUser();
 			// addUser();
-			// launchMapActivity();
+			launchMapActivity();
 		}
 		// } else {
 		super.onActivityResult(requestCode, resultCode, data);

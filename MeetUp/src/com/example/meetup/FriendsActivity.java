@@ -25,7 +25,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.example.meetup.Utils.DatabaseUtil;
-import com.example.meetup.Utils.FacebookUtil;
+
 
 public class FriendsActivity extends Activity {
 
@@ -95,62 +95,62 @@ public class FriendsActivity extends Activity {
 		lv.setAdapter(simpleAdpt);
 	}
 
-	private void makeFacebookFriendsRequest() {
-		FacebookUtil.getFriends(mUserList,
-				new FacebookUtil.FacebookEventListener() {
-
-					@Override
-					public void onFriendsListPopulated() {
-
-						populateFriendsArray(mUserList);
-						simpleAdpt.notifyDataSetChanged();
-						mSpinner.setVisibility(View.GONE);
-					}
-
-					private void populateFriendsArray(
-							HashMap<String, MeetUpUser> mUserList) {
-						Iterator<Entry<String, MeetUpUser>> it = mUserList
-								.entrySet().iterator();
-						ArrayList<Map<String, String>> mFriendsWithoutApp = new ArrayList<Map<String, String>>();
-						while (it.hasNext()) {
-							Map.Entry pairs = (Map.Entry) it.next();
-							MeetUpUser user = (MeetUpUser) pairs.getValue();
-							HashMap<String, String> userForList = createHashmap(
-									"name", user.getName());
-							userForList.put(FriendsHashKeys.FB_ID,
-									user.getFacebookId());
-							if (user.hasApp()) {
-								mFriendsList.add(userForList);
-							} else {
-								mFriendsWithoutApp.add(userForList);
-							}
-						}
-						sortFriendList(mFriendsWithoutApp);
-						sortFriendList(mFriendsList);
-						mFriendsList.add(createHashmap("seperator",
-								"Friends Without App"));
-						mFriendsList.addAll(mFriendsWithoutApp);
-						addSeperators();
-
-					}
-
-					private void sortFriendList(
-							List<Map<String, String>> friendList) {
-						Collections.sort(friendList,
-								new Comparator<Map<String, String>>() {
-									public int compare(Map<String, String> b1,
-											Map<String, String> b2) {
-										return b1
-												.get("name")
-												.toLowerCase()
-												.compareTo(
-														b2.get("name")
-																.toLowerCase());
-									}
-								});
-					}
-				});
-	}
+//	private void makeFacebookFriendsRequest() {
+//		FacebookUtil.getFriends(mUserList,
+//				new FacebookUtil.FacebookEventListener() {
+//
+//					@Override
+//					public void onFriendsListPopulated() {
+//
+//						populateFriendsArray(mUserList);
+//						simpleAdpt.notifyDataSetChanged();
+//						mSpinner.setVisibility(View.GONE);
+//					}
+//
+//					private void populateFriendsArray(
+//							HashMap<String, MeetUpUser> mUserList) {
+//						Iterator<Entry<String, MeetUpUser>> it = mUserList
+//								.entrySet().iterator();
+//						ArrayList<Map<String, String>> mFriendsWithoutApp = new ArrayList<Map<String, String>>();
+//						while (it.hasNext()) {
+//							Map.Entry pairs = (Map.Entry) it.next();
+//							MeetUpUser user = (MeetUpUser) pairs.getValue();
+//							HashMap<String, String> userForList = createHashmap(
+//									"name", user.getName());
+//							userForList.put(FriendsHashKeys.FB_ID,
+//									user.getFacebookId());
+//							if (user.hasApp()) {
+//								mFriendsList.add(userForList);
+//							} else {
+//								mFriendsWithoutApp.add(userForList);
+//							}
+//						}
+//						sortFriendList(mFriendsWithoutApp);
+//						sortFriendList(mFriendsList);
+//						mFriendsList.add(createHashmap("seperator",
+//								"Friends Without App"));
+//						mFriendsList.addAll(mFriendsWithoutApp);
+//						addSeperators();
+//
+//					}
+//
+//					private void sortFriendList(
+//							List<Map<String, String>> friendList) {
+//						Collections.sort(friendList,
+//								new Comparator<Map<String, String>>() {
+//									public int compare(Map<String, String> b1,
+//											Map<String, String> b2) {
+//										return b1
+//												.get("name")
+//												.toLowerCase()
+//												.compareTo(
+//														b2.get("name")
+//																.toLowerCase());
+//									}
+//								});
+//					}
+//				});
+//	}
 
 	// private int[] quickSort(int[] array, int left, int right) {
 	//

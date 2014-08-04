@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.meetup.Utils.MiscUtil;
+import com.example.meetup.Utils.SessionsUtil;
 
 public class CreateAccountActivity extends Activity implements
 		CreateAccountClientListener {
@@ -28,7 +29,6 @@ public class CreateAccountActivity extends Activity implements
 	private EditText mEmailText;
 	private Button mCreateAccountButton;
 	private CreateAccountClient mRequestClient;
-	private SharedPreferences mPreferences;
 	private View mSpinner;
 
 	@Override
@@ -41,7 +41,6 @@ public class CreateAccountActivity extends Activity implements
 		mPasswordConfirmText = (EditText) findViewById(R.id.create_account_password_confirm_text);
 		mEmailText = (EditText) findViewById(R.id.create_account_email_text);
 		mRequestClient = CreateAccountClient.getInstance();
-		mPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
 		mSpinner = (View) findViewById(R.id.overlay_spinner_layout);
 
 		mCreateAccountButton = (Button) findViewById(R.id.send_create_account_button);
@@ -79,7 +78,7 @@ public class CreateAccountActivity extends Activity implements
 			@Override
 			public void run() {
 				if (response.isSuccess()) {
-					saveAccount(response);
+					SessionsUtil.saveAccount(response, CreateAccountActivity.this);
 					MiscUtil.launchActivity(MapActivity.class, null,
 							CreateAccountActivity.this);
 				} else {
@@ -107,18 +106,9 @@ public class CreateAccountActivity extends Activity implements
 		});
 	}
 
-	private void saveAccount(CreateAccountResponse response) {
-		SharedPreferences.Editor editor = mPreferences.edit();
-		editor.putString("AuthToken", response.getAuth_token());
-		editor.putString("Email", response.getEmail());
-		editor.putString("Name", response.getName());
-		editor.commit();
-	}
-
 	@Override
 	public void requestFailedWithError() {
 		this.runOnUiThread(new Runnable() {
-
 			@Override
 			public void run() {
 				mSpinner.setVisibility(View.INVISIBLE);

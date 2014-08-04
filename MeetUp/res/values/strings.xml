@@ -24,7 +24,7 @@
    <string name="action_friends">Friends</string>
     <string name="action_events">Events</string>
     <string name="action_settings">Settings</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_logout">Logout</string>
     
     <!-- Event screen -->
     <string name="event_name_label">Event Name</string>

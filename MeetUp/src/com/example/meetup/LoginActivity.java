@@ -1,8 +1,7 @@
 package com.example.meetup;
 
-import network_clients.LoginClient;
-import network_clients.LoginClient.LoginClientListener;
-import network_clients.LoginClient.LoginResponse;
+import network_clients.SessionsClient;
+import network_clients.SessionsClient.LoginResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,12 +21,12 @@ import android.widget.Toast;
 
 import com.example.meetup.Utils.MiscUtil;
 
-public class LoginActivity extends Activity implements LoginClientListener {
+public class LoginActivity extends Activity implements SessionsClient.SessionsClientListener {
 
 	private EditText mUserEmailText;
 	private EditText mPasswordEditText;
 	private Button mLoginButton;
-	private LoginClient mLoginClient;
+	private SessionsClient mLoginClient;
 	private SharedPreferences mPreferences;
 	private View mSpinner;
 
@@ -36,7 +35,7 @@ public class LoginActivity extends Activity implements LoginClientListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
 		mSpinner = findViewById(R.id.overlay_spinner_layout);
-		mLoginClient = LoginClient.getInstance();
+		mLoginClient = SessionsClient.getInstance();
 		mUserEmailText = (EditText) findViewById(R.id.login_email_text);
 		mPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
 

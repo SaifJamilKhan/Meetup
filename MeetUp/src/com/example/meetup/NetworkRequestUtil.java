@@ -17,99 +17,109 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class NetworkRequestUtil {
-	// private static String baseUrl = "http://meet-up-server.herokuapp.com/";
+    // private static String baseUrl = "http://meet-up-server.herokuapp.com/";
 
-	private static String baseUrl = "http://192.168.0.10:3000/";
+    private static String baseUrl = "http://142.1.54.52:3000/";
 
-	private static class RequestTask extends AsyncTask<String, String, String> {
-		NetworkRequestListener listener;
-		JSONObject body;
+    public static interface NetworkRequestListener {
 
-		public RequestTask(NetworkRequestListener listener, JSONObject body) {
-			this.listener = listener;
-			this.body = body;
-		}
+        public abstract void requestSucceededWithJSON(JSONObject object);
 
-		@Override
-		protected String doInBackground(String... uri) {
-			HttpClient httpclient = new DefaultHttpClient();
-			HttpResponse response;
-			String responseString = null;
-			try {
-				HttpPost post = new HttpPost(uri[0]);
-				post.setHeader("Accept", "application/json");
-				post.setHeader("Content-type", "application/json");
-				StringEntity entity = new StringEntity(this.body.toString());
-				entity.setContentType("application/json");
-				entity.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,
-						"application/json"));
+        public abstract void requestFailedWithJSON(JSONObject object);
 
-				post.setEntity(entity);
-				response = httpclient.execute(post);
-				StatusLine statusLine = response.getStatusLine();
-				if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-					responseString = getResponseString(response);
-					try {
-						JSONObject responseJSON = new JSONObject(responseString);
-						listener.requestSucceededWithJSON(responseJSON);
-					} catch (JSONException e) {
-						listener.requestFailed(e);
-						e.printStackTrace();
-					}
-				} else if (statusLine.getStatusCode() == HttpStatus.SC_UNPROCESSABLE_ENTITY
-						|| statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
-					responseString = getResponseString(response);
-					try {
-						JSONObject responseJSON = new JSONObject(responseString);
-						listener.requestFailedWithJSON(responseJSON);
-					} catch (JSONException e) {
-						listener.requestFailed(e);
-						e.printStackTrace();
-					}
-				} else {
-					listener.requestFailed(null);
-					response.getEntity().getContent().close();
-					throw new IOException(statusLine.getReasonPhrase());
-				}
-			} catch (ClientProtocolException e) {
-				// TODO Handle problems..
-			} catch (IOException e) {
-				// TODO Handle problems..
-			}
-			return responseString;
-		}
+        public abstract void requestFailed(Exception e);
+    }
 
-		private String getResponseString(HttpResponse response)
-				throws IOException {
-			String responseString;
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			response.getEntity().writeTo(out);
-			out.close();
-			responseString = out.toString();
-			return responseString;
-		}
+    public static void makePostRequest(String path,
+                                       NetworkRequestListener listener, JSONObject body) {
+        HttpPost post = new HttpPost(baseUrl + path);
+        post.setHeader("Accept", "application/json");
+        post.setHeader("Content-type", "application/json");
+        try {
+            StringEntity entity = new StringEntity(body.toString());
+            entity.setContentType("application/json");
+            entity.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,
+                    "application/json"));
 
-		@Override
-		protected void onPostExecute(String result) {
-			super.onPostExecute(result);
-			// Do anything with response..
-		}
-	}
+            post.setEntity(entity);
 
-	public static interface NetworkRequestListener {
+            RequestTask task = new RequestTask(listener, body, post);
+            task.execute();
+        } catch (IOException e) {
+            Log.v("", "exception: " + e);
+            listener.requestFailed(null);
+        }
+    }
 
-		public abstract void requestSucceededWithJSON(JSONObject object);
+    private static class RequestTask extends AsyncTask<String, String, String> {
+        NetworkRequestListener listener;
+        JSONObject body;
+        org.apache.http.client.methods.HttpEntityEnclosingRequestBase requestBase;
 
-		public abstract void requestFailedWithJSON(JSONObject object);
+        public RequestTask(NetworkRequestListener listener, JSONObject body, org.apache.http.client.methods.HttpEntityEnclosingRequestBase requestBase) {
+            this.listener = listener;
+            this.body = body;
+            this.requestBase = requestBase;
+        }
 
-		public abstract void requestFailed(Exception e);
-	}
+        @Override
+        protected String doInBackground(String... uri) {
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpResponse response;
+            String responseString = null;
+            try {
+                response = httpclient.execute(requestBase);
+                responseString = handleResponse(response, listener);
+            } catch (ClientProtocolException e) {
+                listener.requestFailed(null);
+            } catch (IOException e) {
+                Log.v("", "exception: " + e);
+                listener.requestFailed(null);
+            }
+            return responseString;
+        }
+    }
 
-	public static void makePostRequest(String path,
-			NetworkRequestListener listener, JSONObject body) {
-		RequestTask task = new RequestTask(listener, body);
-		task.execute(baseUrl + path);
-	}
+    private static String handleResponse(HttpResponse response, NetworkRequestListener listener) throws IOException {
+        String responseString = null;
+        StatusLine statusLine = response.getStatusLine();
+        if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+            responseString = getResponseString(response);
+            try {
+                JSONObject responseJSON = new JSONObject(responseString);
+                listener.requestSucceededWithJSON(responseJSON);
+            } catch (JSONException e) {
+                listener.requestFailed(e);
+                e.printStackTrace();
+            }
+        } else if (statusLine.getStatusCode() == HttpStatus.SC_UNPROCESSABLE_ENTITY
+                || statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+            responseString = getResponseString(response);
+            try {
+                JSONObject responseJSON = new JSONObject(responseString);
+                listener.requestFailedWithJSON(responseJSON);
+            } catch (JSONException e) {
+                listener.requestFailed(e);
+                e.printStackTrace();
+            }
+        } else {
+            listener.requestFailed(null);
+            response.getEntity().getContent().close();
+            throw new IOException(statusLine.getReasonPhrase());
+        }
+        return responseString;
+    }
+
+    private static String getResponseString(HttpResponse response)
+            throws IOException {
+        String responseString;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        response.getEntity().writeTo(out);
+        out.close();
+        responseString = out.toString();
+        return responseString;
+    }
 }

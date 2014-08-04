@@ -14,6 +14,7 @@ import android.view.View;
 import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.GoogleMapsUtil;
 import com.example.meetup.Utils.MiscUtil;
+import com.example.meetup.Utils.SessionsUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
@@ -86,12 +87,14 @@ public class MapActivity extends Activity {
 			MiscUtil.launchActivity(EventsActivity.class, null, this);
 			break;
 		case R.id.action_friends:
-
 			MiscUtil.launchActivity(FriendsActivity.class, null, this);
 			break;
 		case R.id.action_settings:
 			MiscUtil.launchActivity(SettingsActivity.class, null, this);
 			break;
+        case R.id.action_logout:
+            SessionsUtil.destroyAccount(this);
+            finish();
 		}
 		return false;
 	}
@@ -112,7 +115,6 @@ public class MapActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
