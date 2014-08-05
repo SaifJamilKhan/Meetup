@@ -2,16 +2,21 @@ package com.example.meetup;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,7 +27,7 @@ import android.util.Log;
 public class NetworkRequestUtil {
     // private static String baseUrl = "http://meet-up-server.herokuapp.com/";
 
-    private static String baseUrl = "http://142.1.54.52:3000/";
+    private static String baseUrl = "http://192.168.0.15:3000/";
 
     public static interface NetworkRequestListener {
 
@@ -54,6 +59,30 @@ public class NetworkRequestUtil {
         }
     }
 
+    public static void makePutRequest(String path,
+                                       NetworkRequestListener listener, JSONObject body, ArrayList<NameValuePair> parameters) {
+
+        String paramString = URLEncodedUtils.format(parameters, "utf-8");
+        HttpPut put = new HttpPut(baseUrl + path + paramString);
+        put.setHeader("Accept", "application/json");
+        put.setHeader("Content-type", "application/json");
+        try {
+            StringEntity entity = new StringEntity(body.toString());
+            entity.setContentType("application/json");
+            entity.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,
+                    "application/json"));
+
+            put.setEntity(entity);
+
+            RequestTask task = new RequestTask(listener, body, put);
+            task.execute();
+        } catch (IOException e) {
+            Log.v("", "exception: " + e);
+            listener.requestFailed(null);
+        }
+    }
+
+    //    NetworkRequestUtil.makePutRequest(mPath, this, body, parameters);
     private static class RequestTask extends AsyncTask<String, String, String> {
         NetworkRequestListener listener;
         JSONObject body;

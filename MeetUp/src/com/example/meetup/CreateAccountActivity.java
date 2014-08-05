@@ -1,5 +1,6 @@
 package com.example.meetup;
 
+import meetup_objects.AppUser;
 import network_clients.CreateAccountClient;
 import network_clients.CreateAccountClient.CreateAccountClientListener;
 import network_clients.CreateAccountClient.CreateAccountResponse;
@@ -78,7 +79,8 @@ public class CreateAccountActivity extends Activity implements
 			@Override
 			public void run() {
 				if (response.isSuccess()) {
-					SessionsUtil.saveAccount(response, CreateAccountActivity.this);
+                    AppUser user = new AppUser(response.getEmail(), response.getAuth_token(), response.getName());
+					SessionsUtil.saveAccount(user, CreateAccountActivity.this);
 					MiscUtil.launchActivity(MapActivity.class, null,
 							CreateAccountActivity.this);
 				} else {

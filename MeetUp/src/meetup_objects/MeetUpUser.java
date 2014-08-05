@@ -1,27 +1,20 @@
 package meetup_objects;
 
+import java.util.ArrayList;
+
 public class MeetUpUser {
-	public static class UserTableColumns {
+    public static class UserTableColumns {
 		public static String name = "user_name";
-		public static String facebookID = "facebook_id";
 		public static String hasApp = "has_app";
 	}
 
-	private String mName;
-	private String mFacebookId;
+    private String mName;
+	private ArrayList mPhoneNumbers;
 	private boolean mHasApp;
 
-	public MeetUpUser(String name, String facebookId) {
+	public MeetUpUser(String name, ArrayList phoneNumber) {
 		mName = name;
-		mFacebookId = facebookId;
-	}
-
-	public String getFacebookId() {
-		return mFacebookId;
-	}
-
-	public void setFacebookId(String facebookId) {
-		this.mFacebookId = facebookId;
+        mPhoneNumbers = phoneNumber;
 	}
 
 	public String getName() {
@@ -31,6 +24,14 @@ public class MeetUpUser {
 	public void setName(String name) {
 		this.mName = name;
 	}
+
+    public ArrayList getPhoneNumber() {
+        return mPhoneNumbers;
+    }
+
+    public void setPhoneNumber(ArrayList phoneNumber) {
+        mPhoneNumbers = phoneNumber;
+    }
 
 	public boolean hasApp() {
 		return mHasApp;

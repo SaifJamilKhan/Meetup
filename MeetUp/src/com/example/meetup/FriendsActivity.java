@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import meetup_objects.AppUser;
 import meetup_objects.MeetUpUser;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +27,15 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.example.meetup.Utils.DatabaseUtil;
+import com.example.meetup.Utils.PhoneContactsUtil;
+import com.example.meetup.Utils.SessionsUtil;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpParams;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class FriendsActivity extends Activity {
@@ -51,7 +62,23 @@ public class FriendsActivity extends Activity {
 		mSpinner.setVisibility(View.VISIBLE);
 		repository = MURepository
 				.getSingleton(MURepository.SINGLETON_KEYS.KFRIENDS);
-		repository.makeSyncRequest();
+        ArrayList<MeetUpUser> usersInContacts = PhoneContactsUtil.getContacts(this);
+        JSONArray contactPhoneNumbers = new JSONArray();
+        for(MeetUpUser user : usersInContacts) {
+            contactPhoneNumbers.put(user.getPhoneNumber());
+        }
+        JSONObject wrapper = new JSONObject();
+        try {
+            wrapper.put("contact_numbers", contactPhoneNumbers);
+        } catch (JSONException e) {
+            Log.v("json exception", e.getMessage());
+        }
+
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+        AppUser user = SessionsUtil.getUser(this);
+        params.add(new BasicNameValuePair("user_email", user.getEmail()));
+        params.add(new BasicNameValuePair("user_token", user.getAuth_token()));
+		repository.makeSyncRequest(wrapper, params);
 
 		simpleAdpt = new CustomAdapter(this, mFriendsList,
 				R.layout.friend_list_item, new String[] { "name" },
@@ -152,35 +179,6 @@ public class FriendsActivity extends Activity {
 //				});
 //	}
 
-	// private int[] quickSort(int[] array, int left, int right) {
-	//
-	// if (left >= right) {
-	// return array;
-	// }
-	// int pivot = left;
-	//
-	// for (int x = left; x < (right - left); x++) {
-	// if (array[pivot] < array[x]) {
-	// for (int y = right; y > (right - x); y--) {
-	// if (array[pivot] > array[y]) {
-	// swap(x, y, array);
-	// swap(pivot, x, array);
-	//
-	// quickSort(array, x + 1, y - 1);
-	//
-	// }
-	// }
-	// }
-	//
-	// }
-	// return array;
-	// }
-	//
-	// void swap(int i, int j, int[] arr) {
-	// int t = arr[i];
-	// arr[i] = arr[j];
-	// arr[j] = t;
-	// }
 
 	private void addSeperators() {
 

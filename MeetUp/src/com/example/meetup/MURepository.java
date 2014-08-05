@@ -1,44 +1,54 @@
 package com.example.meetup;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.params.HttpParams;
 import org.json.JSONObject;
 
 import com.example.meetup.NetworkRequestUtil.NetworkRequestListener;
+
+import network_clients.FriendClient;
+import network_clients.MUNetworkClient;
 
 public class MURepository implements NetworkRequestListener {
 
 	private static final HashMap<String, MURepository> instances = new HashMap<String, MURepository>();
 
-	private String path;
+    private MUNetworkClient mClient;
 
-	public enum SINGLETON_KEYS {
-		KFRIENDS("/friends");
-		private String path;
+    public MURepository(MUNetworkClient client) {
+        mClient = client;
+    }
 
-		SINGLETON_KEYS(String path) {
-			this.path = path;
+    public enum SINGLETON_KEYS {
+		KFRIENDS(new FriendClient());
+		private MUNetworkClient client;
+
+		SINGLETON_KEYS(MUNetworkClient path) {
+			this.client = path;
 		}
 
-		public String getPath() {
-			return path;
+		public MUNetworkClient getNetworkClient() {
+			return client;
 		}
 	}
 
 	public static MURepository getSingleton(SINGLETON_KEYS key) {
 		MURepository repo;
-		if (instances.containsKey(key.getPath())) {
-			repo = instances.get(key.getPath());
+		if (instances.containsKey(key.getNetworkClient().getClass().toString())) {
+			repo = instances.get(key.getNetworkClient().getClass().toString());
 		} else {
-			repo = new MURepository(key.getPath());
-			instances.put(key.getPath(), repo);
+			repo = new MURepository(key.getNetworkClient());
+			instances.put(key.getNetworkClient().getClass().toString(), repo);
 		}
 		return repo;
 	}
 
-	public MURepository(String path) {
-		this.path = path;
-	}
+    public void makeSyncRequest(JSONObject body, ArrayList<NameValuePair> parameters) {
+        mClient.syncWithServer(body, parameters);
+    }
 
 	@Override
 	public void requestSucceededWithJSON(JSONObject response) {
@@ -47,10 +57,6 @@ public class MURepository implements NetworkRequestListener {
 	@Override
 	public void requestFailed(Exception e) {
 
-	}
-
-	public void makeSyncRequest() {
-		NetworkRequestUtil.makePostRequest(this.path, this);
 	}
 
 	@Override

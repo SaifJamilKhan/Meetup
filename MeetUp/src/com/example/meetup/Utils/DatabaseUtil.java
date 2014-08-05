@@ -42,7 +42,6 @@ public class DatabaseUtil {
 			/* Create Friends Table in the Database. */
 			mDatabase.execSQL("CREATE TABLE IF NOT EXISTS " + mFriendsTableName
 					+ " (" + MeetUpUser.UserTableColumns.name + " VARCHAR, "
-					+ MeetUpUser.UserTableColumns.facebookID + " VARCHAR, "
 					+ MeetUpUser.UserTableColumns.hasApp + " BOOL);");
 
 			// /* Create List of IDs Table used to store friend IDs. */

@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import com.example.meetup.NetworkRequestUtil;
 import com.example.meetup.NetworkRequestUtil.NetworkRequestListener;
 
-public class CreateAccountClient extends MUNetworkClient implements
+public class CreateAccountClient implements
 		NetworkRequestListener {
 	private CreateAccountClientListener mListener;
 	private static CreateAccountClient instance;
