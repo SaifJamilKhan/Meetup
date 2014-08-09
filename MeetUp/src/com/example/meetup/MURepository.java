@@ -12,7 +12,7 @@ import com.example.meetup.NetworkRequestUtil.NetworkRequestListener;
 import network_clients.FriendClient;
 import network_clients.MUNetworkClient;
 
-public class MURepository implements NetworkRequestListener {
+public class MURepository implements MUNetworkClient.MUNetworkClientObserver {
 
 	private static final HashMap<String, MURepository> instances = new HashMap<String, MURepository>();
 
@@ -50,18 +50,13 @@ public class MURepository implements NetworkRequestListener {
         mClient.syncWithServer(body, parameters);
     }
 
-	@Override
-	public void requestSucceededWithJSON(JSONObject response) {
-	}
+    @Override
+    public void requestSucceededWithResponse(ArrayList responses) {
 
-	@Override
-	public void requestFailed(Exception e) {
+    }
 
-	}
+    @Override
+    public void requestFailedWithError() {
 
-	@Override
-	public void requestFailedWithJSON(JSONObject object) {
-
-	}
-
+    }
 }

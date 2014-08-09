@@ -10,17 +10,15 @@ import java.util.ArrayList;
 
 public abstract class MUNetworkClient implements NetworkRequestUtil.NetworkRequestListener {
 
-    protected NetworkClientListener mListener;
+    protected  ArrayList<MUNetworkClientObserver> mObservers;
 
-    public interface NetworkClientListener {
+    public interface MUNetworkClientObserver {
         public void requestSucceededWithResponse(ArrayList responses);
 
         public void requestFailedWithError();
     }
 
-    public void setListener(NetworkClientListener listener) {
-        mListener = listener;
-    }
+    public void addObserver(MUNetworkClientObserver observer) {mObservers.add(observer);}
 
     protected abstract void syncRequestWithParameters(NetworkRequestUtil.NetworkRequestListener listener, JSONObject body,  ArrayList<NameValuePair> parameters);
 
