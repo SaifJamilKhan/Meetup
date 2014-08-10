@@ -1,6 +1,6 @@
 package com.example.meetup;
 
-import meetup_objects.AppUser;
+import meetup_objects.AppUserInfo;
 import network_clients.CreateAccountClient;
 import network_clients.CreateAccountClient.CreateAccountClientListener;
 import network_clients.CreateAccountClient.CreateAccountResponse;
@@ -10,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -57,7 +56,7 @@ public class CreateAccountActivity extends Activity implements
 					user.put("password_confirmation",
 							mPasswordConfirmText.getText());
 					user.put("name", mUserNameText.getText());
-					user.put("phone_number", MiscUtil
+					user.put("phone_numbers", MiscUtil
 							.getDevicePhoneNumber(CreateAccountActivity.this));
 					body.put("user", user);
 				} catch (JSONException e) {
@@ -79,7 +78,7 @@ public class CreateAccountActivity extends Activity implements
 			@Override
 			public void run() {
 				if (response.isSuccess()) {
-                    AppUser user = new AppUser(response.getEmail(), response.getAuth_token(), response.getName());
+                    AppUserInfo user = new AppUserInfo(response.getEmail(), response.getAuth_token(), response.getName());
 					SessionsUtil.saveAccount(user, CreateAccountActivity.this);
 					MiscUtil.launchActivity(MapActivity.class, null,
 							CreateAccountActivity.this);

@@ -8,17 +8,19 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import meetup_objects.MUModel;
+
 public abstract class MUNetworkClient implements NetworkRequestUtil.NetworkRequestListener {
 
-    protected  ArrayList<MUNetworkClientObserver> mObservers;
+    protected  MUNetworkClientListener mListener;
 
-    public interface MUNetworkClientObserver {
-        public void requestSucceededWithResponse(ArrayList responses);
+    public interface MUNetworkClientListener {
+        public void requestSucceededWithResponse(ArrayList<? extends MUModel> responses);
 
         public void requestFailedWithError();
     }
 
-    public void addObserver(MUNetworkClientObserver observer) {mObservers.add(observer);}
+    public void setListener(MUNetworkClientListener listener) {mListener = listener;}
 
     protected abstract void syncRequestWithParameters(NetworkRequestUtil.NetworkRequestListener listener, JSONObject body,  ArrayList<NameValuePair> parameters);
 

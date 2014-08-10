@@ -1,15 +1,11 @@
 package com.example.meetup;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import meetup_objects.AppUser;
+import meetup_objects.AppUserInfo;
 import meetup_objects.MeetUpUser;
 import android.app.Activity;
 import android.content.Context;
@@ -32,13 +28,12 @@ import com.example.meetup.Utils.SessionsUtil;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class FriendsActivity extends Activity {
+public class FriendsActivity extends Activity implements MURepository.MURepositoryObserver {
 
 	ArrayList<Map<String, String>> mFriendsList = new ArrayList<Map<String, String>>();
 	ArrayList<Map<String, String>> mSelectedFriends = new ArrayList<Map<String, String>>();
@@ -49,7 +44,7 @@ public class FriendsActivity extends Activity {
 	private View mSpinner;
 	private MURepository repository;
 
-	public static class FriendsHashKeys {
+    public static class FriendsHashKeys {
 		public static String FB_ID = "fbid";
 	}
 
@@ -60,25 +55,7 @@ public class FriendsActivity extends Activity {
 
 		mSpinner = findViewById(R.id.overlay_spinner_layout);
 		mSpinner.setVisibility(View.VISIBLE);
-		repository = MURepository
-				.getSingleton(MURepository.SINGLETON_KEYS.KFRIENDS);
-        ArrayList<MeetUpUser> usersInContacts = PhoneContactsUtil.getContacts(this);
-        JSONArray contactPhoneNumbers = new JSONArray();
-        for(MeetUpUser user : usersInContacts) {
-            contactPhoneNumbers.put(user.getPhoneNumber());
-        }
-        JSONObject wrapper = new JSONObject();
-        try {
-            wrapper.put("contact_numbers", contactPhoneNumbers);
-        } catch (JSONException e) {
-            Log.v("json exception", e.getMessage());
-        }
-
-        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-        AppUser user = SessionsUtil.getUser(this);
-        params.add(new BasicNameValuePair("user_email", user.getEmail()));
-        params.add(new BasicNameValuePair("user_token", user.getAuth_token()));
-		repository.makeSyncRequest(wrapper, params);
+        setUpRepository();
 
 		simpleAdpt = new CustomAdapter(this, mFriendsList,
 				R.layout.friend_list_item, new String[] { "name" },
@@ -121,6 +98,29 @@ public class FriendsActivity extends Activity {
 		});
 		lv.setAdapter(simpleAdpt);
 	}
+
+    private void setUpRepository() {
+        repository = MURepository
+                .getSingleton(MURepository.SINGLETON_KEYS.KFRIENDS);
+
+        ArrayList<MeetUpUser> usersInContacts = PhoneContactsUtil.getContacts(this);
+        JSONArray contactPhoneNumbers = new JSONArray();
+        for(MeetUpUser user : usersInContacts) {
+            contactPhoneNumbers.put(user.getPhoneNumbers());
+        }
+        JSONObject wrapper = new JSONObject();
+        try {
+            wrapper.put("contact_numbers", contactPhoneNumbers);
+        } catch (JSONException e) {
+            Log.v("json exception", e.getMessage());
+        }
+
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+        AppUserInfo user = SessionsUtil.getUser(this);
+        params.add(new BasicNameValuePair("user_email", user.getEmail()));
+        params.add(new BasicNameValuePair("user_token", user.getAuth_token()));
+        repository.makeSyncRequest(wrapper, params);
+    }
 
 //	private void makeFacebookFriendsRequest() {
 //		FacebookUtil.getFriends(mUserList,
@@ -263,4 +263,14 @@ public class FriendsActivity extends Activity {
 		setResult(Activity.RESULT_OK, intent);
 		super.onBackPressed();
 	}
+
+    @Override
+    public void repositoryDidSync(MURepository repository) {
+        mSpinner.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void repositoryDidFailToUpdate(MURepository repository) {
+        mSpinner.setVisibility(View.GONE);
+    }
 }

@@ -3,11 +3,11 @@ package com.example.meetup.Utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import meetup_objects.AppUser;
+import meetup_objects.AppUserInfo;
 
 public class SessionsUtil {
 
-    public static void saveAccount(AppUser user, Context context) {
+    public static void saveAccount(AppUserInfo user, Context context) {
         SharedPreferences preferences = context.getSharedPreferences("CurrentUser", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("AuthToken", user.getAuth_token());
@@ -22,9 +22,9 @@ public class SessionsUtil {
         editor.commit();
     }
 
-    public static AppUser getUser(Context context) {
+    public static AppUserInfo getUser(Context context) {
         SharedPreferences preferences = context.getSharedPreferences("CurrentUser", Context.MODE_PRIVATE);
-        AppUser user = new AppUser(preferences.getString("Email", null), preferences.getString("AuthToken", null), preferences.getString("Name", null));
+        AppUserInfo user = new AppUserInfo(preferences.getString("Email", null), preferences.getString("AuthToken", null), preferences.getString("Name", null));
         return user;
 
     }

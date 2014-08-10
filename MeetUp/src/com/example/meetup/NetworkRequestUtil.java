@@ -27,7 +27,7 @@ import android.util.Log;
 public class NetworkRequestUtil {
     // private static String baseUrl = "http://meet-up-server.herokuapp.com/";
 
-    private static String baseUrl = "http://192.168.0.15:3000/";
+    private static String baseUrl = "http://138.51.153.204:3000/";
 
     public static interface NetworkRequestListener {
 
@@ -62,8 +62,8 @@ public class NetworkRequestUtil {
     public static void makePutRequest(String path,
                                        NetworkRequestListener listener, JSONObject body, ArrayList<NameValuePair> parameters) {
 
-        String paramString = URLEncodedUtils.format(parameters, "utf-8");
-        HttpPut put = new HttpPut(baseUrl + path + paramString);
+        String paramString = URLEncodedUtils.format(parameters, "UTF-8");
+        HttpPut put = new HttpPut(baseUrl + path + '?' + paramString);
         put.setHeader("Accept", "application/json");
         put.setHeader("Content-type", "application/json");
         try {
@@ -105,7 +105,7 @@ public class NetworkRequestUtil {
             } catch (ClientProtocolException e) {
                 listener.requestFailed(null);
             } catch (IOException e) {
-                Log.v("", "exception: " + e);
+                Log.v("meetup", "exception: " + e);
                 listener.requestFailed(null);
             }
             return responseString;

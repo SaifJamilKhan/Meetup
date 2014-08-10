@@ -1,11 +1,11 @@
 package meetup_objects;
 
-public class AppUser {
+public class AppUserInfo {
     private String mEmail;
     private String mAuth_token;
     private String mName;
 
-    public AppUser(String email, String authToken, String name) {
+    public AppUserInfo(String email, String authToken, String name) {
         mEmail = email;
         mAuth_token = authToken;
         mName = name;

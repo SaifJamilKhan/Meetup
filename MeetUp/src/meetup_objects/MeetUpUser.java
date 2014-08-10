@@ -1,43 +1,62 @@
 package meetup_objects;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 
-public class MeetUpUser {
+public class MeetUpUser extends MUModel{
+
     public static class UserTableColumns {
 		public static String name = "user_name";
 		public static String hasApp = "has_app";
 	}
 
-    private String mName;
-	private ArrayList mPhoneNumbers;
-	private boolean mHasApp;
+    private String name;
+    private String id;
+    private String email;
+    @SerializedName("phone_numbers") private String phoneNumbers;
+    private boolean hasApp;
+    private boolean isFriend;
 
-	public MeetUpUser(String name, ArrayList phoneNumber) {
-		mName = name;
-        mPhoneNumbers = phoneNumber;
+	public MeetUpUser(String name, String phoneNumber) {
+		this.name = name;
+        phoneNumbers = phoneNumber;
 	}
 
 	public String getName() {
-		return mName;
+		return name;
 	}
 
 	public void setName(String name) {
-		this.mName = name;
+		this.name = name;
 	}
 
-    public ArrayList getPhoneNumber() {
-        return mPhoneNumbers;
+    public String getPhoneNumbers() {
+        return phoneNumbers;
     }
 
-    public void setPhoneNumber(ArrayList phoneNumber) {
-        mPhoneNumbers = phoneNumber;
+    public void setPhoneNumbers(String phoneNumber) {
+        phoneNumbers = phoneNumber;
     }
 
 	public boolean hasApp() {
-		return mHasApp;
+		return hasApp;
 	}
 
 	public void setHasApp(boolean hasApp) {
-		this.mHasApp = hasApp;
+		this.hasApp = hasApp;
 	}
+
+    public boolean isFriend() {
+        return isFriend;
+    }
+
+    public void setIsFriend(boolean isFriend) {
+        this.isFriend = isFriend;
+    }
+    @Override
+    public String uniqueKey() {
+        return id;
+    }
+
 }

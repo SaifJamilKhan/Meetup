@@ -33,7 +33,9 @@ public class PhoneContactsUtil {
                         phoneNumbers.add(phoneNo);
                     }
                     pCur.close();
-                    users.add(new MeetUpUser(name, phoneNumbers));
+                    if(phoneNumbers.size() > 0) {
+                        users.add(new MeetUpUser(name, (String) phoneNumbers.get(0)));
+                    }
                 }
             }
         }
