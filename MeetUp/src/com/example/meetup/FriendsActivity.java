@@ -2,11 +2,13 @@ package com.example.meetup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import meetup_objects.AppUserInfo;
 import meetup_objects.MeetUpUser;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -22,7 +24,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.PhoneContactsUtil;
 import com.example.meetup.Utils.SessionsUtil;
 
@@ -35,77 +36,89 @@ import org.json.JSONObject;
 
 public class FriendsActivity extends Activity implements MURepository.MURepositoryObserver {
 
-	ArrayList<Map<String, String>> mFriendsList = new ArrayList<Map<String, String>>();
-	ArrayList<Map<String, String>> mSelectedFriends = new ArrayList<Map<String, String>>();
-	HashMap<String, MeetUpUser> mUserList = new HashMap<String, MeetUpUser>();
+    ArrayList<Map<String, ?>> mFriendsList = new ArrayList<Map<String, ?>>();
+    ArrayList<Map<String, MeetUpUser>> mSelectedFriends = new ArrayList<Map<String, MeetUpUser>>();
+    HashMap<String, MeetUpUser> mUserList = new HashMap<String, MeetUpUser>();
 
-	private SimpleAdapter simpleAdpt;
+    private SimpleAdapter simpleAdpt;
 
-	private View mSpinner;
-	private MURepository repository;
+    private View mSpinner;
+    private MURepository repository;
+    private ListView mListView;
 
     public static class FriendsHashKeys {
-		public static String FB_ID = "fbid";
-	}
+        public static String FB_ID = "fbid";
+    }
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_friends);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_friends);
 
-		mSpinner = findViewById(R.id.overlay_spinner_layout);
-		mSpinner.setVisibility(View.VISIBLE);
+        mSpinner = findViewById(R.id.overlay_spinner_layout);
+        mSpinner.setVisibility(View.VISIBLE);
         setUpRepository();
 
-		simpleAdpt = new CustomAdapter(this, mFriendsList,
-				R.layout.friend_list_item, new String[] { "name" },
-				new int[] { R.id.friend_text });
+        simpleAdpt = new CustomAdapter(this, mFriendsList,
+                R.layout.friend_list_item, new String[]{"name"},
+                new int[]{R.id.friend_text});
 
-		ListView lv = (ListView) findViewById(R.id.friends_list_view);
-		lv.setOnItemClickListener(new OnItemClickListener() {
+        mListView = (ListView) findViewById(R.id.friends_list_view);
+        mListView.setOnItemClickListener(new OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View view,
-					int position, long arg3) {
-				View icon = view.findViewById(R.id.right_icon);
-				if (icon == null) {
-					return;
-				}
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View view,
+                                    int position, long arg3) {
+                View icon = view.findViewById(R.id.right_icon);
+                if (icon == null) {
+                    return;
+                }
 
-				if (icon.getVisibility() == View.VISIBLE) {
-					deSelectFriend(position, icon);
-				} else {
-					selectFriend(position, icon);
-				}
-			}
+                if (icon.getVisibility() == View.VISIBLE) {
+                    deSelectFriend(position, icon);
+                } else {
+                    selectFriend(position, icon);
+                }
+            }
 
-			private void selectFriend(int position, View icon) {
-				if (mFriendsList.get(position).get("name") != null
-						&& position != 0) {
-					icon.setVisibility(View.VISIBLE);
-					mSelectedFriends.add(mFriendsList.get(position));
-				}
-			}
+            private void selectFriend(int position, View icon) {
+                if (mFriendsList.get(position).get("name") != null
+                        && position != 0) {
+                    icon.setVisibility(View.VISIBLE);
+                    mSelectedFriends.add((HashMap<String, MeetUpUser>)mFriendsList.get(position));
+                }
+            }
 
-			private void deSelectFriend(int position, View icon) {
-				Object objectToRemove = mFriendsList.get(position);
-				if (objectToRemove != null && position != 0) {
-					icon.setVisibility(View.GONE);
-					mSelectedFriends.remove(objectToRemove);
-				}
-			}
+            private void deSelectFriend(int position, View icon) {
+                Object objectToRemove = mFriendsList.get(position);
+                if (objectToRemove != null && position != 0) {
+                    icon.setVisibility(View.GONE);
+                    mSelectedFriends.remove(objectToRemove);
+                }
+            }
 
-		});
-		lv.setAdapter(simpleAdpt);
-	}
+        });
+        mListView.setAdapter(simpleAdpt);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        repository.addObserver(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        repository.removeObserver(this);
+    }
 
     private void setUpRepository() {
         repository = MURepository
                 .getSingleton(MURepository.SINGLETON_KEYS.KFRIENDS);
-
         ArrayList<MeetUpUser> usersInContacts = PhoneContactsUtil.getContacts(this);
         JSONArray contactPhoneNumbers = new JSONArray();
-        for(MeetUpUser user : usersInContacts) {
+        for (MeetUpUser user : usersInContacts) {
             contactPhoneNumbers.put(user.getPhoneNumbers());
         }
         JSONObject wrapper = new JSONObject();
@@ -180,94 +193,117 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
 //	}
 
 
-	private void addSeperators() {
+    private void addSeperators() {
+        AppUserInfo user = SessionsUtil.getUser(this);
 
-		mFriendsList.add(
-				0,
-				createHashmap("name",
-						"" + DatabaseUtil.getCurrentUserName(this) + " (me)"));
-		mFriendsList.add(1, createHashmap("seperator", "Friends With App"));
-	}
+        mFriendsList.add(
+                0,
+                createHashmap("user",
+                        new MeetUpUser(user.getName() + "(me)", ""))
+        );
 
-	private class CustomAdapter extends SimpleAdapter {
-		List<? extends Map<String, ?>> data;
-		private LayoutInflater inflater = null;
+        HashMap seperatorWith = new HashMap<String, String>();
+        seperatorWith.put("seperator", "Friends");
+        mFriendsList.add(1, seperatorWith);
 
-		public CustomAdapter(Context context,
-				List<? extends Map<String, ?>> data, int resource,
-				String[] from, int[] to) {
-			super(context, data, resource, from, to);
+        HashMap seperatorWithout = new HashMap<String, String>();
+        seperatorWithout.put("seperator", "Contacts with the app");
+        mFriendsList.add(seperatorWithout);
+    }
 
-			this.data = data;
-			inflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		}
+    private class CustomAdapter extends SimpleAdapter {
+        List<? extends Map<String, ?>> data;
+        private LayoutInflater inflater = null;
 
-		@Override
-		public long getItemId(int position) {
-			// TODO Auto-generated method stub
-			return position;
-		}
+        public CustomAdapter(Context context,
+                             List<? extends Map<String, ?>> data, int resource,
+                             String[] from, int[] to) {
+            super(context, data, resource, from, to);
 
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			View vi = convertView;
-			if (vi == null)
-				vi = inflater.inflate(R.layout.friend_list_item, null);
-			TextView text = (TextView) vi.findViewById(R.id.friend_text);
-			if (text != null) {
-				if (data.get(position).get("name") == null) {
-					text.setBackgroundColor(Color.BLACK);
-					text.setText((CharSequence) data.get(position).get(
-							"seperator"));
-					text.setTextColor(Color.WHITE);
-				} else {
+            this.data = data;
+            inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
 
-					text.setText((CharSequence) data.get(position).get("name"));
-					text.setBackgroundColor(Color.WHITE);
-					text.setTextColor(Color.BLACK);
-				}
-			}
-			return vi;
-		}
-	}
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
 
-	// private FriendsActivity(Parcel in) {
-	//
-	// int sizeOfSelected = in.readInt();
-	// for (int i = 0; i < sizeOfSelected; i++) {
-	// String key = in.readString();
-	// String value = in.readString();
-	// mSelectedFriends.add(FacebookUtil.createItem(key, value));
-	// }
-	//
-	// int size = in.readInt();
-	// for (int i = 0; i < size; i++) {
-	// String key = in.readString();
-	// String value = in.readString();
-	// mFriendsList.add(FacebookUtil.createItem(key, value));
-	// }
-	// }
-	public static HashMap<String, String> createHashmap(String key, String name) {
-		HashMap<String, String> planet = new HashMap<String, String>();
-		planet.put(key, name);
-		return planet;
-	}
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View vi = convertView;
+            if (vi == null)
+                vi = inflater.inflate(R.layout.friend_list_item, null);
+            TextView text = (TextView) vi.findViewById(R.id.friend_text);
+            if (text != null) {
+                if (data.get(position).get("user") == null) {
+                    text.setBackgroundColor(Color.BLACK);
+                    text.setText((CharSequence) data.get(position).get(
+                            "seperator"));
+                    text.setTextColor(Color.WHITE);
+                } else {
+                    MeetUpUser user = (MeetUpUser) data.get(position).get("user");
+                    text.setText(user.getName());
+                    text.setBackgroundColor(Color.WHITE);
+                    text.setTextColor(Color.BLACK);
+                }
+            }
+            return vi;
+        }
+    }
 
-	@Override
-	public void onBackPressed() {
-		FacebookUsersList friends = new FacebookUsersList(mSelectedFriends);
-		Intent intent = getIntent();
-		intent.putExtra("friends", friends);
-		setResult(Activity.RESULT_OK, intent);
-		super.onBackPressed();
-	}
+    // private FriendsActivity(Parcel in) {
+    //
+    // int sizeOfSelected = in.readInt();
+    // for (int i = 0; i < sizeOfSelected; i++) {
+    // String key = in.readString();
+    // String value = in.readString();
+    // mSelectedFriends.add(FacebookUtil.createItem(key, value));
+    // }
+    //
+    // int size = in.readInt();
+    // for (int i = 0; i < size; i++) {
+    // String key = in.readString();
+    // String value = in.readString();
+    // mFriendsList.add(FacebookUtil.createItem(key, value));
+    // }
+    // }
+    public static HashMap<String, MeetUpUser> createHashmap(String key, MeetUpUser user) {
+        HashMap<String, MeetUpUser> planet = new HashMap<String, MeetUpUser>();
+        planet.put(key, user);
+        return planet;
+    }
+
+    @Override
+    public void onBackPressed() {
+        FacebookUsersList friends = new FacebookUsersList(mSelectedFriends);
+        Intent intent = getIntent();
+        intent.putExtra("friends", friends);
+        setResult(Activity.RESULT_OK, intent);
+        super.onBackPressed();
+    }
 
     @Override
     public void repositoryDidSync(MURepository repository) {
         mSpinner.setVisibility(View.GONE);
+        mFriendsList.clear();
+        ArrayList friendsWithApp = new ArrayList();
+        Iterator it = repository.getItems().entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pairs = (Map.Entry) it.next();
+            MeetUpUser user = (MeetUpUser) pairs.getValue();
+            if (user.isFriend()) {
+                mFriendsList.add(createHashmap("user", user));
+            } else {
+                friendsWithApp.add(createHashmap("user", user));
+            }
+        }
+        addSeperators();
+        mFriendsList.addAll(friendsWithApp);
+        simpleAdpt.notifyDataSetChanged();
     }
+
 
     @Override
     public void repositoryDidFailToUpdate(MURepository repository) {

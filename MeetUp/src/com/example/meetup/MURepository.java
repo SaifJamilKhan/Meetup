@@ -1,5 +1,8 @@
 package com.example.meetup;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -17,21 +20,16 @@ import network_clients.MUNetworkClient;
 
 public class MURepository implements MUNetworkClient.MUNetworkClientListener {
 
-    protected  ArrayList<MURepositoryObserver> mObservers = new ArrayList<MURepositoryObserver>();
-
-    public interface MURepositoryObserver {
-        public void repositoryDidSync(MURepository repository);
-        public void repositoryDidFailToUpdate(MURepository repository);
+    public MURepository(MUNetworkClient client) {
+        mClient = client;
     }
-
 	private static final HashMap<String, MURepository> instances = new HashMap<String, MURepository>();
 
     private MUNetworkClient mClient;
     private HashMap items = new HashMap();
 
-    public MURepository(MUNetworkClient client) {
-
-        mClient = client;
+    public HashMap getItems() {
+        return items;
     }
 
     public enum SINGLETON_KEYS {
@@ -69,9 +67,16 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
         for(MUModel model : responses) {
             items.put(model.uniqueKey(), model);
         }
-        for(MURepositoryObserver observer : mObservers) {
-            observer.repositoryDidSync(this);
-        }
+
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                for(MURepositoryObserver observer : mObservers) {
+                    observer.repositoryDidSync(MURepository.this);
+                }
+            }
+        });
     }
 
     @Override
@@ -79,5 +84,20 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
         for(MURepositoryObserver observer : mObservers) {
             observer.repositoryDidFailToUpdate(this);
         }
+    }
+
+    protected  ArrayList<MURepositoryObserver> mObservers = new ArrayList<MURepositoryObserver>();
+
+    public interface MURepositoryObserver {
+        public void repositoryDidSync(MURepository repository);
+        public void repositoryDidFailToUpdate(MURepository repository);
+    }
+
+    public void addObserver(MURepositoryObserver observer) {
+        mObservers.add(observer);
+    }
+
+    public void removeObserver(MURepositoryObserver observer) {
+        mObservers.remove(observer);
     }
 }

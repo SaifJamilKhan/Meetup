@@ -1,12 +1,18 @@
 apply plugin: 'android'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
+    compile 'com.google.code.gson:gson:2.2.+'
+    compile 'com.googlecode.libphonenumber:libphonenumber:3.1+'
     compile 'com.google.android.gms:play-services:4.2.42'
 }
+
 android {
     compileSdkVersion 20
-    buildToolsVersion "20.0.0"
-
+    buildToolsVersion '20.0.0'
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -26,5 +32,13 @@ android {
         // by a similar customization.
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
+    }
+    defaultConfig {
+        minSdkVersion 10
+        targetSdkVersion 20
+    }
+    productFlavors {
+    }
+    buildTypes {
     }
 }

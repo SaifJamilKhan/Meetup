@@ -27,7 +27,7 @@ import android.util.Log;
 public class NetworkRequestUtil {
     // private static String baseUrl = "http://meet-up-server.herokuapp.com/";
 
-    private static String baseUrl = "http://138.51.153.204:3000/";
+    private static String baseUrl = "http://192.168.0.15:3000/";
 
     public static interface NetworkRequestListener {
 

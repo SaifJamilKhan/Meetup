@@ -4,6 +4,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
+import android.telephony.PhoneNumberUtils;
+
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 
 import java.util.ArrayList;
 
@@ -30,7 +35,17 @@ public class PhoneContactsUtil {
                             new String[]{id}, null);
                     while (pCur.moveToNext()) {
                         String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        phoneNumbers.add(phoneNo);
+                        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+                        phoneNo = PhoneNumberUtils.stripSeparators(phoneNo);
+                        Phonenumber.PhoneNumber phoneNumber = new Phonenumber.PhoneNumber();
+                        phoneNumber.setRawInput(phoneNo);
+                        try {
+                            phoneNumber = phoneUtil.parse(phoneNo, "CA");
+                        } catch (NumberParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        phoneNumbers.add(String.valueOf(phoneNumber.getNationalNumber()));
                     }
                     pCur.close();
                     if(phoneNumbers.size() > 0) {
