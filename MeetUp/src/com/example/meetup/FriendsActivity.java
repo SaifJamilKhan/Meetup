@@ -206,9 +206,9 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
         seperatorWith.put("seperator", "Friends");
         mFriendsList.add(1, seperatorWith);
 
-        HashMap seperatorWithout = new HashMap<String, String>();
-        seperatorWithout.put("seperator", "Contacts with the app");
-        mFriendsList.add(seperatorWithout);
+//        HashMap seperatorWithout = new HashMap<String, String>();
+//        seperatorWithout.put("seperator", "Contacts with the app");
+//        mFriendsList.add(seperatorWithout);
     }
 
     private class CustomAdapter extends SimpleAdapter {

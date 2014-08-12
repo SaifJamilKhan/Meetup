@@ -35,19 +35,19 @@ public class FriendClient extends MUNetworkClient implements
         }.getType();
 
         try {
-            ArrayList<MeetUpUser> listOfNonFriendUsers = new Gson().fromJson(object.getJSONArray("non_friends_with_app").toString(), listType);
+//            ArrayList<MeetUpUser> listOfNonFriendUsers = new Gson().fromJson(object.getJSONArray("non_friends_with_app").toString(), listType);
             ArrayList<MeetUpUser> listOfFriendUsers = new Gson().fromJson(object.getJSONArray("friends").toString(), listType);
             ArrayList<MeetUpUser> users = new ArrayList<MeetUpUser>();
-            for(MeetUpUser user : listOfNonFriendUsers) {
-                user.setHasApp(true);
-                user.setIsFriend(false);
-            }
+//            for(MeetUpUser user : listOfNonFriendUsers) {
+//                user.setHasApp(true);
+//                user.setIsFriend(false);
+//            }
 
             for(MeetUpUser user : listOfFriendUsers) {
                 user.setHasApp(true);
                 user.setIsFriend(true);
             }
-            users.addAll(listOfNonFriendUsers);
+//            users.addAll(listOfNonFriendUsers);
             users.addAll(listOfFriendUsers);
             if(mListener != null) {
                 mListener.requestSucceededWithResponse(users);
