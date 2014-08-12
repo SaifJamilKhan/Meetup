@@ -27,7 +27,7 @@ public class PhoneContactsUtil {
                 String name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                 if (Integer.parseInt(cur.getString(
                         cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
-                    ArrayList phoneNumbers = new ArrayList();
+                    ArrayList<String> phoneNumbers = new ArrayList<String>();
                     Cursor pCur = cr.query(
                             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                             null,
@@ -48,8 +48,8 @@ public class PhoneContactsUtil {
                         phoneNumbers.add(String.valueOf(phoneNumber.getNationalNumber()));
                     }
                     pCur.close();
-                    if(phoneNumbers.size() > 0) {
-                        users.add(new MeetUpUser(name, (String) phoneNumbers.get(0)));
+                    for(String phoneNumber : phoneNumbers) {
+                        users.add(new MeetUpUser(name, phoneNumber));
                     }
                 }
             }
