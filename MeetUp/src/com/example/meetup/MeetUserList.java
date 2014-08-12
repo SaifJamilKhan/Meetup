@@ -6,11 +6,11 @@ import java.util.Map;
 
 import meetup_objects.MeetUpUser;
 
-public class FacebookUsersList implements Serializable {
+public class MeetUserList implements Serializable {
 	private static final long serialVersionUID = 4466821913603037341L;
 	ArrayList<Map<String, MeetUpUser>> mUsers = new ArrayList<Map<String, MeetUpUser>>();
 
-	public FacebookUsersList(ArrayList<Map<String, MeetUpUser>> users) {
+	public MeetUserList(ArrayList<Map<String, MeetUpUser>> users) {
 		mUsers = users;
 	}
 

@@ -11,7 +11,6 @@ import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -25,6 +24,7 @@ import com.example.meetup.EventsActivity.EventAttributes;
 import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.MiscUtil;
+import com.example.meetup.FriendsActivity;
 
 public class CreateEventActivity extends Activity implements
 		OnFocusChangeListener {
@@ -33,7 +33,7 @@ public class CreateEventActivity extends Activity implements
 	private EditText mDatePickerText;
 	private EditText mAddressText;
 	private EditText mFriendsInvitedText;
-	private FacebookUsersList mSelectedFriends;
+	private MeetUserList mSelectedFriends;
 	private Button mCreateButton;
 	private EditText mEventNameText;
 	private EditText mEventDescription;
@@ -72,7 +72,7 @@ public class CreateEventActivity extends Activity implements
 				Intent i = new Intent(CreateEventActivity.this,
 						FriendsActivity.class);
 				if (mSelectedFriends != null) {
-					i.putExtra("friends", mSelectedFriends);
+					i.putExtra(FriendsActivity.SerializeKeys.kFriendsSerialized, mSelectedFriends);
 				}
 				startActivityForResult(i, 1);
 			}
@@ -137,11 +137,10 @@ public class CreateEventActivity extends Activity implements
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		Log.v("some", " on activtivy ");
 
 		if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-			mSelectedFriends = (FacebookUsersList) data
-					.getSerializableExtra("friends");
+			mSelectedFriends = (MeetUserList) data
+					.getSerializableExtra(FriendsActivity.SerializeKeys.kFriendsSerialized);
 			if (mSelectedFriends != null) {
 				mFriendsInvitedText.setText(mSelectedFriends.getList().size()
 						+ " friends selected");

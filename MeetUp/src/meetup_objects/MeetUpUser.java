@@ -2,9 +2,9 @@ package meetup_objects;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 
-public class MeetUpUser extends MUModel{
+public class MeetUpUser extends MUModel implements Serializable{
 
     public static class UserTableColumns {
 		public static String name = "user_name";

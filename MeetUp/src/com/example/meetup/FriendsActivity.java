@@ -33,15 +33,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 public class FriendsActivity extends Activity implements MURepository.MURepositoryObserver {
 
+    public static class SerializeKeys {
+        public static final String kFriendsSerialized = "kFriends";
+    }
     ArrayList<Map<String, ?>> mFriendsList = new ArrayList<Map<String, ?>>();
     ArrayList<Map<String, MeetUpUser>> mSelectedFriends = new ArrayList<Map<String, MeetUpUser>>();
     HashMap<String, MeetUpUser> mUserList = new HashMap<String, MeetUpUser>();
-
     private SimpleAdapter simpleAdpt;
-
     private View mSpinner;
     private MURepository repository;
     private ListView mListView;
@@ -54,6 +54,10 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
+        if(getIntent() != null && getIntent().getSerializableExtra(SerializeKeys.kFriendsSerialized) != null) {
+            MeetUserList selectedUserList = (MeetUserList) getIntent().getSerializableExtra(SerializeKeys.kFriendsSerialized);
+            mSelectedFriends = selectedUserList.mUsers;
+        }
 
         mSpinner = findViewById(R.id.overlay_spinner_layout);
         mSpinner.setVisibility(View.VISIBLE);
@@ -64,6 +68,7 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
                 new int[]{R.id.friend_text});
 
         mListView = (ListView) findViewById(R.id.friends_list_view);
+        mListView.setAdapter(simpleAdpt);
         mListView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
@@ -82,7 +87,7 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
             }
 
             private void selectFriend(int position, View icon) {
-                if (mFriendsList.get(position).get("name") != null
+                if (mFriendsList.get(position).get("user") != null
                         && position != 0) {
                     icon.setVisibility(View.VISIBLE);
                     mSelectedFriends.add((HashMap<String, MeetUpUser>)mFriendsList.get(position));
@@ -98,7 +103,6 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
             }
 
         });
-        mListView.setAdapter(simpleAdpt);
     }
 
     @Override
@@ -247,6 +251,11 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
                     text.setText(user.getName());
                     text.setBackgroundColor(Color.WHITE);
                     text.setTextColor(Color.BLACK);
+
+                    View icon = vi.findViewById(R.id.right_icon);
+                    if (icon != null) {
+                        icon.setVisibility(mSelectedFriends.contains(user)? View.VISIBLE : View.GONE);
+                    }
                 }
             }
             return vi;
@@ -269,17 +278,12 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
     // mFriendsList.add(FacebookUtil.createItem(key, value));
     // }
     // }
-    public static HashMap<String, MeetUpUser> createHashmap(String key, MeetUpUser user) {
-        HashMap<String, MeetUpUser> planet = new HashMap<String, MeetUpUser>();
-        planet.put(key, user);
-        return planet;
-    }
 
     @Override
     public void onBackPressed() {
-        FacebookUsersList friends = new FacebookUsersList(mSelectedFriends);
+        MeetUserList friends = new MeetUserList(mSelectedFriends);
         Intent intent = getIntent();
-        intent.putExtra("friends", friends);
+        intent.putExtra(SerializeKeys.kFriendsSerialized, friends);
         setResult(Activity.RESULT_OK, intent);
         super.onBackPressed();
     }
@@ -308,5 +312,11 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
     @Override
     public void repositoryDidFailToUpdate(MURepository repository) {
         mSpinner.setVisibility(View.GONE);
+    }
+
+    public static HashMap<String, MeetUpUser> createHashmap(String key, MeetUpUser user) {
+        HashMap<String, MeetUpUser> planet = new HashMap<String, MeetUpUser>();
+        planet.put(key, user);
+        return planet;
     }
 }
