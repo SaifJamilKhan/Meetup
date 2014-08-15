@@ -24,7 +24,6 @@ import com.example.meetup.EventsActivity.EventAttributes;
 import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.MiscUtil;
-import com.example.meetup.FriendsActivity;
 
 public class CreateEventActivity extends Activity implements
 		OnFocusChangeListener {
@@ -142,7 +141,7 @@ public class CreateEventActivity extends Activity implements
 			mSelectedFriends = (MeetUserList) data
 					.getSerializableExtra(FriendsActivity.SerializeKeys.kFriendsSerialized);
 			if (mSelectedFriends != null) {
-				mFriendsInvitedText.setText(mSelectedFriends.getList().size()
+				mFriendsInvitedText.setText(mSelectedFriends.getUsers().size()
 						+ " friends selected");
 			}
 		}

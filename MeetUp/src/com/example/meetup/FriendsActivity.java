@@ -39,7 +39,7 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
         public static final String kFriendsSerialized = "kFriends";
     }
     ArrayList<Map<String, ?>> mFriendsList = new ArrayList<Map<String, ?>>();
-    ArrayList<Map<String, MeetUpUser>> mSelectedFriends = new ArrayList<Map<String, MeetUpUser>>();
+    HashMap<String, MeetUpUser> mSelectedFriends = new HashMap<String, MeetUpUser>();
     HashMap<String, MeetUpUser> mUserList = new HashMap<String, MeetUpUser>();
     private SimpleAdapter simpleAdpt;
     private View mSpinner;
@@ -90,7 +90,8 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
                 if (mFriendsList.get(position).get("user") != null
                         && position != 0) {
                     icon.setVisibility(View.VISIBLE);
-                    mSelectedFriends.add((HashMap<String, MeetUpUser>)mFriendsList.get(position));
+                    HashMap<String, MeetUpUser> userInList = (HashMap<String, MeetUpUser>)mFriendsList.get(position);
+                    mSelectedFriends.put(userInList.get("user").uniqueKey(), userInList.get("user"));
                 }
             }
 
@@ -98,7 +99,8 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
                 Object objectToRemove = mFriendsList.get(position);
                 if (objectToRemove != null && position != 0) {
                     icon.setVisibility(View.GONE);
-                    mSelectedFriends.remove(objectToRemove);
+                    MeetUpUser deselectedUser = ((HashMap<String, MeetUpUser>)mFriendsList.get(position)).get("user");
+                    mSelectedFriends.remove(deselectedUser.uniqueKey());
                 }
             }
 
@@ -254,7 +256,7 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
 
                     View icon = vi.findViewById(R.id.right_icon);
                     if (icon != null) {
-                        icon.setVisibility(mSelectedFriends.contains(user)? View.VISIBLE : View.GONE);
+                        icon.setVisibility(mSelectedFriends.containsKey(user.uniqueKey())? View.VISIBLE : View.GONE);
                     }
                 }
             }
