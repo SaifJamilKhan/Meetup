@@ -12,8 +12,9 @@ public class MeetUpUser extends MUModel implements Serializable{
 	}
 
     private String name;
-    private String id;
+    private Number id;
     private String email;
+
     @SerializedName("phone_numbers") private String phoneNumbers;
     private boolean hasApp;
     private boolean isFriend;
@@ -54,9 +55,18 @@ public class MeetUpUser extends MUModel implements Serializable{
     public void setIsFriend(boolean isFriend) {
         this.isFriend = isFriend;
     }
+
+    public Number getId() {
+        return id;
+    }
+
+    public void setId(Number id) {
+        this.id = id;
+    }
+
     @Override
     public String uniqueKey() {
-        return id;
+        return id.toString();
     }
 
 }

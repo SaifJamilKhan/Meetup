@@ -1,6 +1,8 @@
 package com.example.meetup;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 import android.app.Activity;
@@ -21,12 +23,18 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 
 import com.example.meetup.EventsActivity.EventAttributes;
-import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.MiscUtil;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import meetup_objects.MeetUpEvent;
+import meetup_objects.MeetUpUser;
 
 public class CreateEventActivity extends Activity implements
-		OnFocusChangeListener {
+		OnFocusChangeListener, MURepository.MURepositoryObserver{
 
 	private EditText mTimePickerText;
 	private EditText mDatePickerText;
@@ -40,9 +48,11 @@ public class CreateEventActivity extends Activity implements
 	private long mTimeTimeSinceInSeconds;
 	public static final String[] MONTHS = { "Jan", "Feb", "Mar", "Apr", "May",
 			"Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    private MURepository mEventsRepository;
 
-	@Override
+    @Override
 	protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_event);
 
 		mTimePickerText = (EditText) findViewById(R.id.timePickerText);
@@ -85,19 +95,17 @@ public class CreateEventActivity extends Activity implements
 				if (!isFormValid()) {
 					return;
 				}
-				DatabaseUtil.addEvent(CreateEventActivity.this, mEventNameText
-						.getText().toString(), mEventDescription.getText()
-						.toString(),
-						(mDateTimeSinceInSeconds + mTimeTimeSinceInSeconds),
-						mAddressText.getText().toString());
-
-				Bundle bundle = new Bundle();
-				bundle.putString(EventAttributes.EVENT_NAME, mEventNameText
-						.getText().toString());
-				bundle.putString(EventAttributes.EVENT_DESCRIPTION,
-						mEventDescription.getText().toString());
-				MiscUtil.launchActivity(EventDetailsActivity.class, bundle,
-						CreateEventActivity.this);
+                ArrayList<Number> friendsIds = new ArrayList<Number>();
+               for(MeetUpUser user : mSelectedFriends.getUsers().values()) {
+                   friendsIds.add(user.getId());
+               }
+                MeetUpEvent event = new MeetUpEvent(mEventNameText.getText().toString(), mEventDescription.getText().toString(), mAddressText.getText().toString(),
+                                                    new Date((mTimeTimeSinceInSeconds + mDateTimeSinceInSeconds) * 1000), friendsIds);
+                try {
+                    mEventsRepository.makePostRequest(new JSONObject(new Gson().toJson(event)), CreateEventActivity.this);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 			}
 
 		});
@@ -111,10 +119,18 @@ public class CreateEventActivity extends Activity implements
 			// int latitude = bundle.getInt("lat");
 			// int longitude = bundle.getInt("lon");
 		}
-		super.onCreate(savedInstanceState);
+        mEventsRepository = MURepository.getSingleton(MURepository.SINGLETON_KEYS.KEVENTS);
+        mEventsRepository.addObserver(this);
+        mEventsRepository.makeSyncRequest(this);
 	}
 
-	private boolean isFormValid() {
+    @Override
+    protected void onDestroy() {
+        mEventsRepository.removeObserver(this);
+        super.onDestroy();
+    }
+
+    private boolean isFormValid() {
 		if (mEventNameText.getText().length() == 0) {
 			DialogUtil.showOkDialog("Invalid Event Name",
 					"You forgot to add an event name!", this);
@@ -209,4 +225,22 @@ public class CreateEventActivity extends Activity implements
 				.getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 	}
+
+    //MURepository observer
+
+    @Override
+    public void repositoryDidSync(MURepository repository) {
+        Bundle bundle = new Bundle();
+        bundle.putString(EventAttributes.EVENT_NAME, mEventNameText
+                .getText().toString());
+        bundle.putString(EventAttributes.EVENT_DESCRIPTION,
+                mEventDescription.getText().toString());
+        MiscUtil.launchActivity(EventDetailsActivity.class, bundle,
+                CreateEventActivity.this);
+    }
+
+    @Override
+    public void repositoryDidFailToUpdate(MURepository repository) {
+        DialogUtil.showOkDialog("Failed to create event", "Please try again later", this);
+    }
 }

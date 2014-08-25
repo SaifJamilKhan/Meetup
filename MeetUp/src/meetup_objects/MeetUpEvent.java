@@ -1,38 +1,46 @@
 package meetup_objects;
 
-public class MeetUpEvent {
-	public static class EventTableColumns {
+import java.util.ArrayList;
+import java.util.Date;
+
+public class MeetUpEvent extends MUModel{
+
+    public static class EventTableColumns {
 		public static String name = "event_name";
 		public static String id = "id";
 		public static String description = "event_description";
 		public static String address = "event_address";
 		public static String startDate = "start_date";
-		public static String endDate = "end_date";
 	}
 
 	private String mName;
 	private String mDescription;
 	private String mAddress;
-	private String mStartDate;
-	private String mEndDate;
+	private Date mStartDate;
 	private String mID;
+    private ArrayList mListOfFriends;
+
+    public ArrayList getListOfFriends() {
+        return mListOfFriends;
+    }
+
+    public void setListOfFriends(ArrayList mListOfFriends) {
+        this.mListOfFriends = mListOfFriends;
+    }
 
 	public MeetUpEvent(String name, String description, String address,
-			String startDate, String endDate) {
+                       Date startDate, ArrayList listOfFriendIds) {
 		setName(name);
 		setDescription(description);
 		setAddress(address);
 		setStartDate(startDate);
-		setEndDate(endDate);
+        setListOfFriends(listOfFriendIds);
 	}
 
-	public String getEndDate() {
-		return mEndDate;
-	}
-
-	public void setEndDate(String endDate) {
-		this.mEndDate = endDate;
-	}
+    @Override
+    public String uniqueKey() {
+        return mID;
+    }
 
 	public String getName() {
 		return mName;
@@ -66,11 +74,11 @@ public class MeetUpEvent {
 		mID = id;
 	}
 
-	public String getStartDate() {
+	public Date getStartDate() {
 		return mStartDate;
 	}
 
-	public void setStartDate(String mStartDate) {
+	public void setStartDate(Date mStartDate) {
 		this.mStartDate = mStartDate;
 	}
 

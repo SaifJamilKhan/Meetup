@@ -5,13 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import meetup_objects.AppUserInfo;
 import meetup_objects.MeetUpEvent;
+import meetup_objects.MeetUpUser;
+
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,15 +29,24 @@ import android.widget.TextView;
 
 import com.example.meetup.Utils.DatabaseUtil;
 import com.example.meetup.Utils.MiscUtil;
+import com.example.meetup.Utils.PhoneContactsUtil;
+import com.example.meetup.Utils.SessionsUtil;
 
-public class EventsActivity extends Activity implements ActionBar.TabListener {
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class EventsActivity extends Activity implements MURepository.MURepositoryObserver {
 
 	private ArrayList<MeetUpEvent> mListOfEvents;
 	private CustomAdapter simpleAdpt;
 	private View mSpinner;
 	private ArrayList<HashMap<String, String>> mEventsData;
+    private MURepository mRepository;
 
-	public static class EventAttributes {
+    public static class EventAttributes {
 		public static String EVENT_NAME = "event_name";
 		public static String EVENT_DESCRIPTION = "event_description";
 	}
@@ -42,18 +55,6 @@ public class EventsActivity extends Activity implements ActionBar.TabListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_events);
-		ActionBar actionBar = getActionBar();
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-		ActionBar.Tab newTab0 = actionBar.newTab();
-		newTab0.setText("Tab 0 title");
-		newTab0.setTabListener(this);
-		ActionBar.Tab newTab1 = actionBar.newTab();
-		newTab1.setText("Tab 1 title");
-		newTab1.setTabListener(this);
-
-		actionBar.addTab(newTab0);
-		actionBar.addTab(newTab1);
 
 		mListOfEvents = new ArrayList<MeetUpEvent>();
 		mSpinner = findViewById(R.id.overlay_spinner_layout);
@@ -64,20 +65,19 @@ public class EventsActivity extends Activity implements ActionBar.TabListener {
 				new int[] { R.id.event_title });
 
 		setUpListView();
-
-		getLocalEvents();
-		finishLoadingData();
+        mSpinner = findViewById(R.id.overlay_spinner_layout);
+        mSpinner.setVisibility(View.VISIBLE);
+        setUpRepository();
+//		getLocalEvents();
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu items for use in the action bar
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.event_menu, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
+    @Override
+    protected void onDestroy() {
+        mRepository.removeObserver(this);
+        super.onDestroy();
+    }
 
-	private void setUpListView() {
+    private void setUpListView() {
 		ListView lv = (ListView) findViewById(R.id.events_list_view);
 		lv.setOnItemClickListener(new OnItemClickListener() {
 
@@ -133,6 +133,24 @@ public class EventsActivity extends Activity implements ActionBar.TabListener {
 		}
 	}
 
+    private void setUpRepository() {
+        mRepository = MURepository
+                .getSingleton(MURepository.SINGLETON_KEYS.KFRIENDS);
+        mRepository.addObserver(this);
+        ArrayList<MeetUpUser> usersInContacts = PhoneContactsUtil.getContacts(this);
+        JSONArray contactPhoneNumbers = new JSONArray();
+        for (MeetUpUser user : usersInContacts) {
+            contactPhoneNumbers.put(user.getPhoneNumbers());
+        }
+        JSONObject wrapper = new JSONObject();
+        try {
+            wrapper.put("contact_numbers", contactPhoneNumbers);
+        } catch (JSONException e) {
+            Log.v("json exception", e.getMessage());
+        }
+        mRepository.makeSyncRequest(wrapper, this);
+    }
+
 	private void finishLoadingData() {
 		simpleAdpt.notifyDataSetChanged();
 		mSpinner.setVisibility(View.GONE);
@@ -149,28 +167,15 @@ public class EventsActivity extends Activity implements ActionBar.TabListener {
 		}
 	}
 
-	// private void getEvents() {
-	// /* make the API call */
-	// new Request(ParseFacebookUtils.getSession(), "/{event-id}", null,
-	// HttpMethod.GET, new Request.Callback() {
-	// public void onCompleted(Response response) {
-	// /* handle the result */
-	// Log.v("saif", ""
-	// + response.getGraphObject());
-	// }
-	// }).executeAsync();
-	// }
+    //MURepository Observer
 
-	@Override
-	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+    @Override
+    public void repositoryDidSync(MURepository repository) {
 
-	}
+    }
 
-	@Override
-	public void onTabSelected(Tab tab, FragmentTransaction ft) {
-	}
+    @Override
+    public void repositoryDidFailToUpdate(MURepository repository) {
 
-	@Override
-	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-	}
+    }
 }

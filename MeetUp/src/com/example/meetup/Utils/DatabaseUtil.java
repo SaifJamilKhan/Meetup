@@ -36,8 +36,7 @@ public class DatabaseUtil {
 					+ MeetUpEvent.EventTableColumns.id + " INTEGER, "
 					+ MeetUpEvent.EventTableColumns.description + " VARCHAR, "
 					+ MeetUpEvent.EventTableColumns.address + " VARCHAR, "
-					+ MeetUpEvent.EventTableColumns.startDate + " INTEGER, "
-					+ MeetUpEvent.EventTableColumns.endDate + " INTEGER);");
+					+ MeetUpEvent.EventTableColumns.startDate + " INTEGER);");
 
 			/* Create Friends Table in the Database. */
 			mDatabase.execSQL("CREATE TABLE IF NOT EXISTS " + mFriendsTableName
@@ -151,14 +150,12 @@ public class DatabaseUtil {
 						.getColumnIndex(EventTableColumns.description));
 				String address = c.getString(c
 						.getColumnIndex(EventTableColumns.address));
-				String endDate = c.getString(c
-						.getColumnIndex(EventTableColumns.endDate));
 				String startDate = c.getString(c
 						.getColumnIndex(EventTableColumns.startDate));
 
-				MeetUpEvent event = new MeetUpEvent(name, description, address,
-						startDate, endDate);
-				events.add(event);
+//				MeetUpEvent event = new MeetUpEvent(name, description, address,
+//						startDate, new ArrayList());
+//				events.add(event);
 			}
 			return events;
 		} else {
@@ -184,13 +181,13 @@ public class DatabaseUtil {
 				String address = c.getString(c
 						.getColumnIndex(EventTableColumns.address));
 				String endDate = c.getString(c
-						.getColumnIndex(EventTableColumns.endDate));
-				String startDate = c.getString(c
+//						.getColumnIndex(EventTableColumns.endDate));
+//				String startDate = c.getString(c
 						.getColumnIndex(EventTableColumns.startDate));
 
-				MeetUpEvent event = new MeetUpEvent(name, description, address,
-						startDate, endDate);
-				events.add(event);
+//				MeetUpEvent event = new MeetUpEvent(name, description, address,
+//						startDate, endDate);
+//				events.add(event);
 			}
 			return events;
 		} else {

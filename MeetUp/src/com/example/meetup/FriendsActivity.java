@@ -43,7 +43,7 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
     HashMap<String, MeetUpUser> mUserList = new HashMap<String, MeetUpUser>();
     private SimpleAdapter simpleAdpt;
     private View mSpinner;
-    private MURepository repository;
+    private MURepository mRepository;
     private ListView mListView;
 
     public static class FriendsHashKeys {
@@ -110,17 +110,17 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
     @Override
     protected void onResume() {
         super.onResume();
-        repository.addObserver(this);
+        mRepository.addObserver(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        repository.removeObserver(this);
+        mRepository.removeObserver(this);
     }
 
     private void setUpRepository() {
-        repository = MURepository
+        mRepository = MURepository
                 .getSingleton(MURepository.SINGLETON_KEYS.KFRIENDS);
         ArrayList<MeetUpUser> usersInContacts = PhoneContactsUtil.getContacts(this);
         JSONArray contactPhoneNumbers = new JSONArray();
@@ -134,11 +134,7 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
             Log.v("json exception", e.getMessage());
         }
 
-        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-        AppUserInfo user = SessionsUtil.getUser(this);
-        params.add(new BasicNameValuePair("user_email", user.getEmail()));
-        params.add(new BasicNameValuePair("user_token", user.getAuth_token()));
-        repository.makeSyncRequest(wrapper, params);
+        mRepository.makeSyncRequest(wrapper, this);
     }
 
 //	private void makeFacebookFriendsRequest() {
@@ -255,7 +251,7 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
                     text.setTextColor(Color.BLACK);
 
                     View icon = vi.findViewById(R.id.right_icon);
-                    if (icon != null) {
+                    if (icon != null && position > 0) {
                         icon.setVisibility(mSelectedFriends.containsKey(user.uniqueKey())? View.VISIBLE : View.GONE);
                     }
                 }

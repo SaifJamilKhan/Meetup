@@ -1,5 +1,6 @@
 package com.example.meetup;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -8,13 +9,17 @@ import java.util.Dictionary;
 import java.util.HashMap;
 
 import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpParams;
 import org.json.JSONObject;
 
 import com.example.meetup.NetworkRequestUtil.NetworkRequestListener;
+import com.example.meetup.Utils.SessionsUtil;
 import com.google.gson.Gson;
 
+import meetup_objects.AppUserInfo;
 import meetup_objects.MUModel;
+import network_clients.EventsClient;
 import network_clients.FriendClient;
 import network_clients.MUNetworkClient;
 
@@ -33,7 +38,7 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
     }
 
     public enum SINGLETON_KEYS {
-		KFRIENDS(new FriendClient());
+		KFRIENDS(new FriendClient()), KEVENTS(new EventsClient());
 		private MUNetworkClient client;
 
 		SINGLETON_KEYS(MUNetworkClient path) {
@@ -58,8 +63,24 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
 		return repo;
 	}
 
-    public void makeSyncRequest(JSONObject body, ArrayList<NameValuePair> parameters) {
-        mClient.syncWithServer(body, parameters);
+    public void makePostRequest(JSONObject body, Context context) {
+        mClient.syncWithServer(body, authenticationParameters(context));
+    }
+
+    public void makeSyncRequest(Context context) {
+        mClient.syncWithServer(authenticationParameters(context));
+    }
+
+    public void makeSyncRequest(JSONObject body, Context context) {
+        mClient.syncWithServer(body, authenticationParameters(context));
+    }
+
+    public ArrayList<NameValuePair> authenticationParameters(Context context){
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+        AppUserInfo user = SessionsUtil.getUser(context);
+        params.add(new BasicNameValuePair("user_email", user.getEmail()));
+        params.add(new BasicNameValuePair("user_token", user.getAuth_token()));
+        return params;
     }
 
     @Override

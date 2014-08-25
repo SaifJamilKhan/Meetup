@@ -10,8 +10,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -27,7 +29,7 @@ import android.util.Log;
 public class NetworkRequestUtil {
     // private static String baseUrl = "http://meet-up-server.herokuapp.com/";
 
-    private static String baseUrl = "http://192.168.0.15:3000/";
+    private static String baseUrl = "http://142.1.57.197:3000/";
 
     public static interface NetworkRequestListener {
 
@@ -40,9 +42,18 @@ public class NetworkRequestUtil {
 
     public static void makePostRequest(String path,
                                        NetworkRequestListener listener, JSONObject body) {
-        HttpPost post = new HttpPost(baseUrl + path);
-        post.setHeader("Accept", "application/json");
-        post.setHeader("Content-type", "application/json");
+        makePostRequest(path, listener, body, null);
+    }
+
+    public static void makePostRequest(String path,
+                                      NetworkRequestListener listener, JSONObject body, ArrayList<NameValuePair> parameters) {
+        String url = baseUrl + path;
+
+        if(parameters != null) {
+            url.concat("?" + URLEncodedUtils.format(parameters, "UTF-8"));
+        }
+        HttpPost post = new HttpPost(url);
+        setJSONHeaders(post);
         try {
             StringEntity entity = new StringEntity(body.toString());
             entity.setContentType("application/json");
@@ -51,7 +62,7 @@ public class NetworkRequestUtil {
 
             post.setEntity(entity);
 
-            RequestTask task = new RequestTask(listener, body, post);
+            RequestTask task = new RequestTask(listener, post);
             task.execute();
         } catch (IOException e) {
             Log.v("", "exception: " + e);
@@ -64,8 +75,7 @@ public class NetworkRequestUtil {
 
         String paramString = URLEncodedUtils.format(parameters, "UTF-8");
         HttpPut put = new HttpPut(baseUrl + path + '?' + paramString);
-        put.setHeader("Accept", "application/json");
-        put.setHeader("Content-type", "application/json");
+        setJSONHeaders(put);
         try {
             StringEntity entity = new StringEntity(body.toString());
             entity.setContentType("application/json");
@@ -74,7 +84,7 @@ public class NetworkRequestUtil {
 
             put.setEntity(entity);
 
-            RequestTask task = new RequestTask(listener, body, put);
+            RequestTask task = new RequestTask(listener, put);
             task.execute();
         } catch (IOException e) {
             Log.v("", "exception: " + e);
@@ -82,15 +92,28 @@ public class NetworkRequestUtil {
         }
     }
 
-    //    NetworkRequestUtil.makePutRequest(mPath, this, body, parameters);
+    public static void makeGetRequest(String path,
+                                      NetworkRequestListener listener, ArrayList<NameValuePair> parameters) {
+
+        String paramString = URLEncodedUtils.format(parameters, "UTF-8");
+        HttpGet get = new HttpGet(baseUrl + path + '?' + paramString);
+        setJSONHeaders(get);
+        RequestTask task = new RequestTask(listener, get);
+        task.execute();
+    }
+
+    private static void setJSONHeaders(HttpRequestBase request) {
+        request.setHeader("Accept", "application/json");
+        request.setHeader("Content-type", "application/json");
+    }
+
     private static class RequestTask extends AsyncTask<String, String, String> {
         NetworkRequestListener listener;
-        JSONObject body;
-        org.apache.http.client.methods.HttpEntityEnclosingRequestBase requestBase;
+//        JSONObject body;
+        HttpRequestBase requestBase;
 
-        public RequestTask(NetworkRequestListener listener, JSONObject body, org.apache.http.client.methods.HttpEntityEnclosingRequestBase requestBase) {
+        public RequestTask(NetworkRequestListener listener, HttpRequestBase requestBase) {
             this.listener = listener;
-            this.body = body;
             this.requestBase = requestBase;
         }
 

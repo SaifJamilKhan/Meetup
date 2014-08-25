@@ -24,7 +24,17 @@ public abstract class MUNetworkClient implements NetworkRequestUtil.NetworkReque
 
     protected abstract void syncRequestWithParameters(NetworkRequestUtil.NetworkRequestListener listener, JSONObject body,  ArrayList<NameValuePair> parameters);
 
+    protected abstract void postWithParameters(NetworkRequestUtil.NetworkRequestListener listener, JSONObject body,  ArrayList<NameValuePair> parameters);
+
+    public void syncWithServer(ArrayList<NameValuePair> parameters) {
+        this.syncRequestWithParameters(this, null, parameters);
+    }
+
     public void syncWithServer(JSONObject body, ArrayList<NameValuePair> parameters) {
         this.syncRequestWithParameters(this, body, parameters);
+    }
+
+    public void postToServer(JSONObject body, ArrayList<NameValuePair> parameters) {
+        this.postWithParameters(this, body, parameters);
     }
 }

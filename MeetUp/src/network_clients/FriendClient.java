@@ -18,13 +18,16 @@ import meetup_objects.MeetUpUser;
 public class FriendClient extends MUNetworkClient implements
         NetworkRequestUtil.NetworkRequestListener {
 
-    private static FriendClient instance;
-
     private final String mPath = "friends";
 
     @Override
     protected void syncRequestWithParameters(NetworkRequestUtil.NetworkRequestListener listener, JSONObject body, ArrayList<NameValuePair> parameters) {
         NetworkRequestUtil.makePutRequest(mPath, this, body, parameters);
+    }
+
+    @Override
+    protected void postWithParameters(NetworkRequestUtil.NetworkRequestListener listener, JSONObject body, ArrayList<NameValuePair> parameters) {
+        NetworkRequestUtil.makePostRequest(mPath, this, body, parameters);
     }
 
     //Network Request Listener
@@ -35,22 +38,15 @@ public class FriendClient extends MUNetworkClient implements
         }.getType();
 
         try {
-//            ArrayList<MeetUpUser> listOfNonFriendUsers = new Gson().fromJson(object.getJSONArray("non_friends_with_app").toString(), listType);
             ArrayList<MeetUpUser> listOfFriendUsers = new Gson().fromJson(object.getJSONArray("friends").toString(), listType);
-            ArrayList<MeetUpUser> users = new ArrayList<MeetUpUser>();
-//            for(MeetUpUser user : listOfNonFriendUsers) {
-//                user.setHasApp(true);
-//                user.setIsFriend(false);
-//            }
 
             for(MeetUpUser user : listOfFriendUsers) {
                 user.setHasApp(true);
                 user.setIsFriend(true);
             }
-//            users.addAll(listOfNonFriendUsers);
-            users.addAll(listOfFriendUsers);
+
             if(mListener != null) {
-                mListener.requestSucceededWithResponse(users);
+                mListener.requestSucceededWithResponse(listOfFriendUsers);
             }
         } catch (JSONException e) {
             e.printStackTrace();
