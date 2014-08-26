@@ -64,7 +64,7 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
 	}
 
     public void makePostRequest(JSONObject body, Context context) {
-        mClient.syncWithServer(body, authenticationParameters(context));
+        mClient.postToServer(body, authenticationParameters(context));
     }
 
     public void makeSyncRequest(Context context) {

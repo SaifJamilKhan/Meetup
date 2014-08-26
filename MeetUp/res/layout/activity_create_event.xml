@@ -99,4 +99,6 @@
         android:text="Create Event"
         android:textAlignment="0" />
 
+    <include layout="@layout/loading_spinner" />
+
 </RelativeLayout>

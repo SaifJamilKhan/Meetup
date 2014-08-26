@@ -1,5 +1,6 @@
 package com.example.meetup;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -13,6 +14,8 @@ import android.app.TimePickerDialog.OnTimeSetListener;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -26,6 +29,14 @@ import com.example.meetup.EventsActivity.EventAttributes;
 import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.MiscUtil;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,11 +60,16 @@ public class CreateEventActivity extends Activity implements
 	public static final String[] MONTHS = { "Jan", "Feb", "Mar", "Apr", "May",
 			"Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
     private MURepository mEventsRepository;
+    private View mSpinner;
+    private double mLatitude;
+    private double mLongitude;
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_event);
+
+        mSpinner = findViewById(R.id.overlay_spinner_layout);
 
 		mTimePickerText = (EditText) findViewById(R.id.timePickerText);
 		mTimePickerText.setOnClickListener(new View.OnClickListener() {
@@ -95,14 +111,23 @@ public class CreateEventActivity extends Activity implements
 				if (!isFormValid()) {
 					return;
 				}
+                mSpinner.setVisibility(View.VISIBLE);
+
                 ArrayList<Number> friendsIds = new ArrayList<Number>();
-               for(MeetUpUser user : mSelectedFriends.getUsers().values()) {
-                   friendsIds.add(user.getId());
-               }
+                if(mSelectedFriends != null) {
+                    for (MeetUpUser user : mSelectedFriends.getUsers().values()) {
+                        friendsIds.add(user.getId());
+                    }
+                }
                 MeetUpEvent event = new MeetUpEvent(mEventNameText.getText().toString(), mEventDescription.getText().toString(), mAddressText.getText().toString(),
-                                                    new Date((mTimeTimeSinceInSeconds + mDateTimeSinceInSeconds) * 1000), friendsIds);
+                                                    new Date((mTimeTimeSinceInSeconds + mDateTimeSinceInSeconds) * 1000), friendsIds, mLatitude, mLatitude);
                 try {
-                    mEventsRepository.makePostRequest(new JSONObject(new Gson().toJson(event)), CreateEventActivity.this);
+                    MeetUpEvent.JsonTimeSerializer timeSerializer = new MeetUpEvent.JsonTimeSerializer();
+
+                    Gson gson = new GsonBuilder()
+                            .registerTypeAdapter(Date.class, timeSerializer).create();
+
+                    mEventsRepository.makePostRequest(new JSONObject(gson.toJson(event)), CreateEventActivity.this);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -116,12 +141,11 @@ public class CreateEventActivity extends Activity implements
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
 			mAddressText.setText(bundle.getString("address"));
-			// int latitude = bundle.getInt("lat");
-			// int longitude = bundle.getInt("lon");
+			mLatitude = bundle.getDouble("lat");
+			mLongitude = bundle.getDouble("lon");
 		}
         mEventsRepository = MURepository.getSingleton(MURepository.SINGLETON_KEYS.KEVENTS);
         mEventsRepository.addObserver(this);
-        mEventsRepository.makeSyncRequest(this);
 	}
 
     @Override
@@ -146,6 +170,11 @@ public class CreateEventActivity extends Activity implements
 					"You forgot to add a start time!", this);
 			return false;
 		}
+        if (mSelectedFriends == null || mSelectedFriends.getUsers().size() == 0) {
+            DialogUtil.showOkDialog("No friends",
+                    "You need to invite friends to make a meet up!", this);
+            return false;
+        }
 		return true;
 	}
 
@@ -208,7 +237,7 @@ public class CreateEventActivity extends Activity implements
 						mDatePickerText.setText(getFormattedDate(datePicker));
 						clearViewInput(datePicker);
 						mDateTimeSinceInSeconds = datePicker.getCalendarView()
-								.getDate();
+								.getDate()/1000;
 					}
 
 				}, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
@@ -230,17 +259,33 @@ public class CreateEventActivity extends Activity implements
 
     @Override
     public void repositoryDidSync(MURepository repository) {
-        Bundle bundle = new Bundle();
-        bundle.putString(EventAttributes.EVENT_NAME, mEventNameText
-                .getText().toString());
-        bundle.putString(EventAttributes.EVENT_DESCRIPTION,
-                mEventDescription.getText().toString());
-        MiscUtil.launchActivity(EventDetailsActivity.class, bundle,
-                CreateEventActivity.this);
+//        Handler mainHandler = new Handler(Looper.getMainLooper());
+//        mainHandler.post(new Runnable() {
+//                             @Override
+//                             public void run() {
+//                                 mSpinner.setVisibility(View.VISIBLE);
+//
+//                                 Bundle bundle = new Bundle();
+//                                 bundle.putString(EventAttributes.EVENT_NAME, mEventNameText
+//                                         .getText().toString());
+//                                 bundle.putString(EventAttributes.EVENT_DESCRIPTION,
+//                                         mEventDescription.getText().toString());
+//                                 MiscUtil.launchActivity(EventDetailsActivity.class, bundle,
+//                                         CreateEventActivity.this);
+//                                 finish();
+//                             }
+//                         });
     }
 
     @Override
     public void repositoryDidFailToUpdate(MURepository repository) {
-        DialogUtil.showOkDialog("Failed to create event", "Please try again later", this);
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mSpinner.setVisibility(View.GONE);
+                DialogUtil.showOkDialog("Failed to create event", "Please try again later", CreateEventActivity.this);
+            }
+        });
     }
 }

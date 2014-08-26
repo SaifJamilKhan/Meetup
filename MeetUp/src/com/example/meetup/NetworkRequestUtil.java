@@ -29,7 +29,7 @@ import android.util.Log;
 public class NetworkRequestUtil {
     // private static String baseUrl = "http://meet-up-server.herokuapp.com/";
 
-    private static String baseUrl = "http://142.1.57.197:3000/";
+    private static String baseUrl = "http://192.168.0.12:3000/";
 
     public static interface NetworkRequestListener {
 
@@ -50,7 +50,8 @@ public class NetworkRequestUtil {
         String url = baseUrl + path;
 
         if(parameters != null) {
-            url.concat("?" + URLEncodedUtils.format(parameters, "UTF-8"));
+            String params = URLEncodedUtils.format(parameters, "UTF-8");
+            url = url.concat("?" + params);
         }
         HttpPost post = new HttpPost(url);
         setJSONHeaders(post);
@@ -136,7 +137,7 @@ public class NetworkRequestUtil {
     }
 
     private static String handleResponse(HttpResponse response, NetworkRequestListener listener) throws IOException {
-        String responseString = null;
+        String responseString;
         StatusLine statusLine = response.getStatusLine();
         if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
             responseString = getResponseString(response);

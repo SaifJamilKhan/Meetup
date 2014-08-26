@@ -1,7 +1,10 @@
 package network_clients;
 
+import android.util.Log;
+
 import com.example.meetup.NetworkRequestUtil;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.http.NameValuePair;
@@ -10,6 +13,8 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.logging.Logger;
 
 import meetup_objects.MUModel;
 import meetup_objects.MeetUpEvent;
@@ -37,16 +42,24 @@ public class EventsClient extends MUNetworkClient implements
 
         try {
             ArrayList<MUModel> eventArray = new ArrayList<MUModel>();
-            if(object.getJSONObject("event") != null) {
+            if(object.has("event")) {
                 Type listType = new TypeToken<MeetUpEvent>() {
                 }.getType();
-                MeetUpEvent event = new Gson().fromJson(object.getJSONObject("event").toString(), listType);
+
+                MeetUpEvent.JsonTimeDeserializer timeDeserializer = new MeetUpEvent.JsonTimeDeserializer();
+
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(Date.class, timeDeserializer).create();
+
+                MeetUpEvent event = gson.fromJson(object.getJSONObject("event").toString(), listType);
                 eventArray.add(event);
-            } else if(object.getJSONObject("events") != null) {
+            } else if(object.has("events")) {
                 Type listType = new TypeToken<ArrayList<MeetUpEvent>>() {
                 }.getType();
-                ArrayList<MeetUpEvent> events = new Gson().fromJson(object.getJSONObject("events").toString(), listType);
-                eventArray.addAll(events);
+                eventArray = new Gson().fromJson(object.getJSONArray("events").toString(), listType);
+            } else {
+                Log.v("meetup", "Didnt have event or events in json response");
+                mListener.requestFailedWithError();
             }
             if(mListener != null) {
                 mListener.requestSucceededWithResponse(eventArray);
@@ -58,12 +71,12 @@ public class EventsClient extends MUNetworkClient implements
 
     @Override
     public void requestFailedWithJSON(JSONObject object) {
-
+        mListener.requestFailedWithError();
     }
 
     @Override
     public void requestFailed(Exception e) {
-
+        mListener.requestFailedWithError();
     }
 
 }

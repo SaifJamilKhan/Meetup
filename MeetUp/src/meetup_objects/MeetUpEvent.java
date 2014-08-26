@@ -1,9 +1,35 @@
 package meetup_objects;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.annotations.SerializedName;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class MeetUpEvent extends MUModel{
+
+    public static class JsonTimeSerializer implements com.google.gson.JsonSerializer<Date> {
+        @Override
+          public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext
+                context) {
+            return src == null ? null : new JsonPrimitive(src.getTime()/1000);
+        }
+
+    }
+
+    public static class JsonTimeDeserializer implements JsonDeserializer {
+
+        @Override
+        public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return new Date(json.getAsInt() * 1000);
+        }
+    }
 
     public static class EventTableColumns {
 		public static String name = "event_name";
@@ -13,12 +39,30 @@ public class MeetUpEvent extends MUModel{
 		public static String startDate = "start_date";
 	}
 
-	private String mName;
-	private String mDescription;
-	private String mAddress;
-	private Date mStartDate;
-	private String mID;
-    private ArrayList mListOfFriends;
+    @SerializedName("name")private String mName;
+    @SerializedName("description")private String mDescription;
+    @SerializedName("address")private String mAddress;
+    @SerializedName("start_time")private Date mStartTime;
+    @SerializedName("id")private String mID;
+    @SerializedName("friend_ids")private ArrayList mListOfFriends;
+    @SerializedName("latitude")private Double mLatitude;
+    @SerializedName("longitude")private Double mLongitude;
+
+    public Double getLatitude() {
+        return mLatitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.mLatitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return mLongitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.mLongitude = longitude;
+    }
 
     public ArrayList getListOfFriends() {
         return mListOfFriends;
@@ -29,12 +73,14 @@ public class MeetUpEvent extends MUModel{
     }
 
 	public MeetUpEvent(String name, String description, String address,
-                       Date startDate, ArrayList listOfFriendIds) {
+                       Date startDate, ArrayList listOfFriendIds, Double latitude, Double longitude) {
 		setName(name);
 		setDescription(description);
 		setAddress(address);
 		setStartDate(startDate);
         setListOfFriends(listOfFriendIds);
+        setLatitude(latitude);
+        setLongitude(longitude);
 	}
 
     @Override
@@ -75,11 +121,11 @@ public class MeetUpEvent extends MUModel{
 	}
 
 	public Date getStartDate() {
-		return mStartDate;
+		return mStartTime;
 	}
 
 	public void setStartDate(Date mStartDate) {
-		this.mStartDate = mStartDate;
+		this.mStartTime = mStartDate;
 	}
 
 }
