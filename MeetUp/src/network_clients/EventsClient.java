@@ -56,7 +56,12 @@ public class EventsClient extends MUNetworkClient implements
             } else if(object.has("events")) {
                 Type listType = new TypeToken<ArrayList<MeetUpEvent>>() {
                 }.getType();
-                eventArray = new Gson().fromJson(object.getJSONArray("events").toString(), listType);
+                MeetUpEvent.JsonTimeDeserializer timeDeserializer = new MeetUpEvent.JsonTimeDeserializer();
+
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(Date.class, timeDeserializer).create();
+
+                eventArray = gson.fromJson(object.getJSONArray("events").toString(), listType);
             } else {
                 Log.v("meetup", "Didnt have event or events in json response");
                 mListener.requestFailedWithError();

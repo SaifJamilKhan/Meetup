@@ -11,6 +11,7 @@ import com.google.gson.annotations.SerializedName;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 public class MeetUpEvent extends MUModel{
 
@@ -44,7 +45,7 @@ public class MeetUpEvent extends MUModel{
     @SerializedName("address")private String mAddress;
     @SerializedName("start_time")private Date mStartTime;
     @SerializedName("id")private String mID;
-    @SerializedName("friend_ids")private ArrayList mListOfFriends;
+    @SerializedName("participants")private ArrayList<MeetUpUser> mListOfFriends;
     @SerializedName("latitude")private Double mLatitude;
     @SerializedName("longitude")private Double mLongitude;
 
@@ -64,16 +65,24 @@ public class MeetUpEvent extends MUModel{
         this.mLongitude = longitude;
     }
 
-    public ArrayList getListOfFriends() {
+    public ArrayList<MeetUpUser> getListOfFriends() {
         return mListOfFriends;
     }
 
-    public void setListOfFriends(ArrayList mListOfFriends) {
+    public void setListOfFriends (ArrayList<MeetUpUser> mListOfFriends) {
         this.mListOfFriends = mListOfFriends;
     }
 
-	public MeetUpEvent(String name, String description, String address,
-                       Date startDate, ArrayList listOfFriendIds, Double latitude, Double longitude) {
+    public HashMap<String, MeetUpUser> getListOfFriendHashmap() {
+        HashMap<String, MeetUpUser> hashMap = new HashMap<String, MeetUpUser>();
+        for(MeetUpUser user : mListOfFriends) {
+            hashMap.put(user.uniqueKey(), user);
+        }
+        return hashMap;
+    }
+
+    public MeetUpEvent(String name, String description, String address,
+                       Date startDate, ArrayList<MeetUpUser> listOfFriendIds, Double latitude, Double longitude) {
 		setName(name);
 		setDescription(description);
 		setAddress(address);

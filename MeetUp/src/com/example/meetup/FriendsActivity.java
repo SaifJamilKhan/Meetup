@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import meetup_objects.AppUserInfo;
+import meetup_objects.MUModel;
 import meetup_objects.MeetUpUser;
 
 import android.app.Activity;
@@ -59,9 +60,9 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
             mSelectedFriends = selectedUserList.mUsers;
         }
 
+        setUpRepository();
         mSpinner = findViewById(R.id.overlay_spinner_layout);
         mSpinner.setVisibility(View.VISIBLE);
-        setUpRepository();
 
         simpleAdpt = new CustomAdapter(this, mFriendsList,
                 R.layout.friend_list_item, new String[]{"name"},
@@ -252,30 +253,13 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
 
                     View icon = vi.findViewById(R.id.right_icon);
                     if (icon != null && position > 0) {
-                        icon.setVisibility(mSelectedFriends.containsKey(user.uniqueKey())? View.VISIBLE : View.GONE);
+                        icon.setVisibility(mSelectedFriends.containsKey(user.uniqueKey()) ? View.VISIBLE : View.GONE);
                     }
                 }
             }
             return vi;
         }
     }
-
-    // private FriendsActivity(Parcel in) {
-    //
-    // int sizeOfSelected = in.readInt();
-    // for (int i = 0; i < sizeOfSelected; i++) {
-    // String key = in.readString();
-    // String value = in.readString();
-    // mSelectedFriends.add(FacebookUtil.createItem(key, value));
-    // }
-    //
-    // int size = in.readInt();
-    // for (int i = 0; i < size; i++) {
-    // String key = in.readString();
-    // String value = in.readString();
-    // mFriendsList.add(FacebookUtil.createItem(key, value));
-    // }
-    // }
 
     @Override
     public void onBackPressed() {
@@ -310,6 +294,11 @@ public class FriendsActivity extends Activity implements MURepository.MUReposito
     @Override
     public void repositoryDidFailToUpdate(MURepository repository) {
         mSpinner.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void repositoryDidUpdateItems(ArrayList<? extends MUModel> items) {
+
     }
 
     public static HashMap<String, MeetUpUser> createHashmap(String key, MeetUpUser user) {

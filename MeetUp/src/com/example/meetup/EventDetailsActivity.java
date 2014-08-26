@@ -11,20 +11,19 @@ public class EventDetailsActivity extends Activity {
 	// private TextView mListOfFriendsText;
 	private TextView mEventNameText;
 	private TextView mEventDescriptionText;
+    private TextView mListOfFriendsText;
+    private MeetUserList mParticipants;
 
-	@Override
+    @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_event_details);
-		// mListOfFriendsText = (TextView)
-		// findViewById(R.id.event_list_of_friends_invited);
+		mListOfFriendsText = (TextView) findViewById(R.id.event_list_of_friends_invited);
 		mEventNameText = (TextView) findViewById(R.id.event_name);
 		mEventDescriptionText = (TextView) findViewById(R.id.event_description);
 
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
-			// mListOfFriendsText.setText(bundle.getString(AttributeNames.)
-			// + " Friends");
 			mEventNameText
 					.setText(bundle.getString(EventAttributes.EVENT_NAME));
 
@@ -34,6 +33,8 @@ public class EventDetailsActivity extends Activity {
 			mEventNameText
 					.setText(bundle.getString(EventAttributes.EVENT_NAME));
 
+            mParticipants = (MeetUserList) bundle.getSerializable(EventAttributes.EVENT_PARTICIPANTS);
+            mListOfFriendsText.setText(mParticipants.getUsers().size() + " friends selected");
 		}
 	}
 }

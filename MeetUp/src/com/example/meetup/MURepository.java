@@ -84,7 +84,7 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
     }
 
     @Override
-    public void requestSucceededWithResponse(ArrayList<? extends MUModel> responses) {
+    public void requestSucceededWithResponse(final ArrayList<? extends MUModel> responses) {
         for(MUModel model : responses) {
             items.put(model.uniqueKey(), model);
         }
@@ -95,6 +95,8 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
             public void run() {
                 for(MURepositoryObserver observer : mObservers) {
                     observer.repositoryDidSync(MURepository.this);
+                    observer.repositoryDidUpdateItems(responses);
+
                 }
             }
         });
@@ -112,6 +114,7 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
     public interface MURepositoryObserver {
         public void repositoryDidSync(MURepository repository);
         public void repositoryDidFailToUpdate(MURepository repository);
+        public void repositoryDidUpdateItems(ArrayList<? extends MUModel> items);
     }
 
     public void addObserver(MURepositoryObserver observer) {

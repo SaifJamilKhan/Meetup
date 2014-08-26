@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.TimeZone;
 
 import android.app.Activity;
@@ -41,6 +42,7 @@ import com.google.gson.JsonSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import meetup_objects.MUModel;
 import meetup_objects.MeetUpEvent;
 import meetup_objects.MeetUpUser;
 
@@ -63,6 +65,7 @@ public class CreateEventActivity extends Activity implements
     private View mSpinner;
     private double mLatitude;
     private double mLongitude;
+    private MURepository mFriendsRepository;
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -113,14 +116,14 @@ public class CreateEventActivity extends Activity implements
 				}
                 mSpinner.setVisibility(View.VISIBLE);
 
-                ArrayList<Number> friendsIds = new ArrayList<Number>();
+                ArrayList<MeetUpUser> participants = new ArrayList<MeetUpUser>();
                 if(mSelectedFriends != null) {
                     for (MeetUpUser user : mSelectedFriends.getUsers().values()) {
-                        friendsIds.add(user.getId());
+                        participants.add(user);
                     }
                 }
                 MeetUpEvent event = new MeetUpEvent(mEventNameText.getText().toString(), mEventDescription.getText().toString(), mAddressText.getText().toString(),
-                                                    new Date((mTimeTimeSinceInSeconds + mDateTimeSinceInSeconds) * 1000), friendsIds, mLatitude, mLatitude);
+                                                    new Date((mTimeTimeSinceInSeconds + mDateTimeSinceInSeconds) * 1000), participants, mLatitude, mLatitude);
                 try {
                     MeetUpEvent.JsonTimeSerializer timeSerializer = new MeetUpEvent.JsonTimeSerializer();
 
@@ -145,6 +148,7 @@ public class CreateEventActivity extends Activity implements
 			mLongitude = bundle.getDouble("lon");
 		}
         mEventsRepository = MURepository.getSingleton(MURepository.SINGLETON_KEYS.KEVENTS);
+        mFriendsRepository = MURepository.getSingleton(MURepository.SINGLETON_KEYS.KFRIENDS);
         mEventsRepository.addObserver(this);
 	}
 
@@ -259,24 +263,33 @@ public class CreateEventActivity extends Activity implements
 
     @Override
     public void repositoryDidSync(MURepository repository) {
-//        Handler mainHandler = new Handler(Looper.getMainLooper());
-//        mainHandler.post(new Runnable() {
-//                             @Override
-//                             public void run() {
-//                                 mSpinner.setVisibility(View.VISIBLE);
-//
-//                                 Bundle bundle = new Bundle();
-//                                 bundle.putString(EventAttributes.EVENT_NAME, mEventNameText
-//                                         .getText().toString());
-//                                 bundle.putString(EventAttributes.EVENT_DESCRIPTION,
-//                                         mEventDescription.getText().toString());
-//                                 MiscUtil.launchActivity(EventDetailsActivity.class, bundle,
-//                                         CreateEventActivity.this);
-//                                 finish();
-//                             }
-//                         });
+
     }
 
+    @Override
+    public void repositoryDidUpdateItems(ArrayList<? extends MUModel> items) {
+        final MeetUpEvent createdEvent = (MeetUpEvent)items.get(0);
+
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+
+                Bundle bundle = new Bundle();
+                bundle.putString(EventAttributes.EVENT_NAME, createdEvent.getName());
+                bundle.putString(EventAttributes.EVENT_DESCRIPTION, createdEvent.getDescription());
+                HashMap<String, MeetUpUser> participants = new HashMap<String, MeetUpUser>();
+                for(MeetUpUser participant : createdEvent.getListOfFriends()) {
+                     participants.put(participant.uniqueKey(), participant);
+                }
+
+                bundle.putSerializable(EventAttributes.EVENT_PARTICIPANTS, new MeetUserList(participants));
+                MiscUtil.launchActivity(EventDetailsActivity.class, bundle,
+                        CreateEventActivity.this);
+                finish();
+            }
+        });
+    }
     @Override
     public void repositoryDidFailToUpdate(MURepository repository) {
         Handler mainHandler = new Handler(Looper.getMainLooper());

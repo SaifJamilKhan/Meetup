@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import meetup_objects.AppUserInfo;
+import meetup_objects.MUModel;
 import meetup_objects.MeetUpEvent;
 import meetup_objects.MeetUpUser;
 
@@ -15,6 +16,8 @@ import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,6 +31,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.example.meetup.Utils.DatabaseUtil;
+import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.MiscUtil;
 import com.example.meetup.Utils.PhoneContactsUtil;
 import com.example.meetup.Utils.SessionsUtil;
@@ -43,22 +47,24 @@ public class EventsActivity extends Activity implements MURepository.MURepositor
 	private ArrayList<MeetUpEvent> mListOfEvents;
 	private CustomAdapter simpleAdpt;
 	private View mSpinner;
-	private ArrayList<HashMap<String, String>> mEventsData;
+	private ArrayList<HashMap<String, ?>> mEventsData;
     private MURepository mRepository;
 
     public static class EventAttributes {
 		public static String EVENT_NAME = "event_name";
 		public static String EVENT_DESCRIPTION = "event_description";
+        public static String EVENT_PARTICIPANTS = "event_friends";
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_events);
+        setUpRepository();
 
 		mListOfEvents = new ArrayList<MeetUpEvent>();
 		mSpinner = findViewById(R.id.overlay_spinner_layout);
-		mEventsData = new ArrayList<HashMap<String, String>>();
+		mEventsData = new ArrayList<HashMap<String, ?>>();
 		simpleAdpt = new CustomAdapter(this, mEventsData,
 				R.layout.events_list_item,
 				new String[] { EventAttributes.EVENT_NAME },
@@ -67,8 +73,6 @@ public class EventsActivity extends Activity implements MURepository.MURepositor
 		setUpListView();
         mSpinner = findViewById(R.id.overlay_spinner_layout);
         mSpinner.setVisibility(View.VISIBLE);
-        setUpRepository();
-//		getLocalEvents();
 	}
 
     @Override
@@ -84,15 +88,18 @@ public class EventsActivity extends Activity implements MURepository.MURepositor
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View view,
 					int position, long arg3) {
-				Bundle bundle = new Bundle();
-				bundle.putString(
-						EventAttributes.EVENT_NAME,
-						mEventsData.get(position).get(
-								EventAttributes.EVENT_NAME));
-				bundle.putString(EventAttributes.EVENT_DESCRIPTION, mEventsData
-						.get(position).get(EventAttributes.EVENT_DESCRIPTION));
-				MiscUtil.launchActivity(EventDetailsActivity.class, bundle,
-						EventsActivity.this);
+                if(mEventsData.get(position).containsKey("event")) {
+                    MeetUpEvent event = ((MeetUpEvent) mEventsData.get(position).get("event"));
+                    Bundle bundle = new Bundle();
+                    bundle.putString(
+                            EventAttributes.EVENT_NAME,
+                            event.getName());
+
+                    bundle.putString(EventAttributes.EVENT_DESCRIPTION, event.getDescription());
+                    bundle.putSerializable(EventAttributes.EVENT_PARTICIPANTS, new MeetUserList(event.getListOfFriendHashmap()));
+                    MiscUtil.launchActivity(EventDetailsActivity.class, bundle,
+                            EventsActivity.this);
+                }
 			}
 		});
 		lv.setAdapter(simpleAdpt);
@@ -124,10 +131,10 @@ public class EventsActivity extends Activity implements MURepository.MURepositor
 				vi = inflater.inflate(R.layout.events_list_item, null);
 			TextView text = (TextView) vi.findViewById(R.id.event_title);
 			if (text != null) {
-				if (data.get(position).get(EventAttributes.EVENT_NAME) != null) {
-					text.setText((CharSequence) data.get(position).get(
-							EventAttributes.EVENT_NAME));
-				}
+                if(data.get(position).containsKey("event")) {
+                    MeetUpEvent event = (MeetUpEvent)data.get(position).get("event");
+                    text.setText((CharSequence) event.getName());
+                }
 			}
 			return vi;
 		}
@@ -135,20 +142,9 @@ public class EventsActivity extends Activity implements MURepository.MURepositor
 
     private void setUpRepository() {
         mRepository = MURepository
-                .getSingleton(MURepository.SINGLETON_KEYS.KFRIENDS);
+                .getSingleton(MURepository.SINGLETON_KEYS.KEVENTS);
         mRepository.addObserver(this);
-        ArrayList<MeetUpUser> usersInContacts = PhoneContactsUtil.getContacts(this);
-        JSONArray contactPhoneNumbers = new JSONArray();
-        for (MeetUpUser user : usersInContacts) {
-            contactPhoneNumbers.put(user.getPhoneNumbers());
-        }
-        JSONObject wrapper = new JSONObject();
-        try {
-            wrapper.put("contact_numbers", contactPhoneNumbers);
-        } catch (JSONException e) {
-            Log.v("json exception", e.getMessage());
-        }
-        mRepository.makeSyncRequest(wrapper, this);
+        mRepository.makeSyncRequest(this);
     }
 
 	private void finishLoadingData() {
@@ -156,26 +152,38 @@ public class EventsActivity extends Activity implements MURepository.MURepositor
 		mSpinner.setVisibility(View.GONE);
 	}
 
-	private void getLocalEvents() {
-		mListOfEvents = DatabaseUtil.getAllEvents(this);
-		for (int x = 0; x < mListOfEvents.size(); x++) {
-			HashMap<String, String> hash = new HashMap<String, String>();
-			hash.put(EventAttributes.EVENT_NAME, mListOfEvents.get(x).getName());
-			hash.put(EventAttributes.EVENT_DESCRIPTION, mListOfEvents.get(x)
-					.getDescription());
-			mEventsData.add(hash);
-		}
-	}
-
     //MURepository Observer
 
     @Override
-    public void repositoryDidSync(MURepository repository) {
-
+    public void repositoryDidSync(final MURepository repository) {
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mSpinner.setVisibility(View.GONE);
+                mListOfEvents = new ArrayList<MeetUpEvent>();
+                mListOfEvents.addAll(repository.getItems().values());
+                for(MeetUpEvent event : mListOfEvents) {
+                    mEventsData.add(createHashmap("event", event));
+                }
+                simpleAdpt.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
     public void repositoryDidFailToUpdate(MURepository repository) {
 
+    }
+
+    @Override
+    public void repositoryDidUpdateItems(ArrayList<? extends MUModel> items) {
+
+    }
+
+    public static HashMap<String, MeetUpEvent> createHashmap(String key, MeetUpEvent event) {
+        HashMap<String, MeetUpEvent> planet = new HashMap<String, MeetUpEvent>();
+        planet.put(key, event);
+        return planet;
     }
 }
