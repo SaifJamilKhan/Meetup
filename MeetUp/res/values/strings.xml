@@ -30,6 +30,8 @@
     <string name="event_name_label">Event Name</string>
      <string name="event_description_label">Event Description</string>
      <string name="event_list_of_friends_label">Event List of Friends</string>
+    <string name="event_show_on_map">Show on map</string>
+    <string name="event_hide_on_map">Hide on map</string>
     
     <!-- Emojis -->
     <string name="x">❌</string>

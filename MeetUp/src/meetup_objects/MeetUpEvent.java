@@ -48,6 +48,7 @@ public class MeetUpEvent extends MUModel{
     @SerializedName("participants")private ArrayList<MeetUpUser> mListOfFriends;
     @SerializedName("latitude")private Double mLatitude;
     @SerializedName("longitude")private Double mLongitude;
+    private boolean showOnMap;
 
     public Double getLatitude() {
         return mLatitude;
@@ -137,4 +138,11 @@ public class MeetUpEvent extends MUModel{
 		this.mStartTime = mStartDate;
 	}
 
+    public boolean shouldShowOnMap() {
+        return showOnMap;
+    }
+
+    public void setShowOnMap(boolean showOnMap) {
+        this.showOnMap = showOnMap;
+    }
 }

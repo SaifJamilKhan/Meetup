@@ -1,6 +1,7 @@
 package com.example.meetup;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -132,8 +134,22 @@ public class EventsActivity extends Activity implements MURepository.MURepositor
 			TextView text = (TextView) vi.findViewById(R.id.event_title);
 			if (text != null) {
                 if(data.get(position).containsKey("event")) {
-                    MeetUpEvent event = (MeetUpEvent)data.get(position).get("event");
+                    final MeetUpEvent event = (MeetUpEvent)data.get(position).get("event");
                     text.setText((CharSequence) event.getName());
+
+                    final Button showOnMapButton = (Button)vi.findViewById(R.id.show_on_map_btn);
+                    showOnMapButton.setText(event.shouldShowOnMap()? getString(R.string.event_hide_on_map) : getString(R.string.event_show_on_map));
+                    showOnMapButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            event.setShowOnMap(!event.shouldShowOnMap());
+                            if(event.shouldShowOnMap()) {
+                                showOnMapButton.setText(getString(R.string.event_hide_on_map));
+                            } else {
+                                showOnMapButton.setText(getString(R.string.event_show_on_map));
+                            }
+                        }
+                    });
                 }
 			}
 			return vi;
@@ -162,6 +178,7 @@ public class EventsActivity extends Activity implements MURepository.MURepositor
             public void run() {
                 mSpinner.setVisibility(View.GONE);
                 mListOfEvents = new ArrayList<MeetUpEvent>();
+//                Collection<MeetUpEvent> events = (Collection<MeetUpEvent>) repository.getItems().values();
                 mListOfEvents.addAll(repository.getItems().values());
                 for(MeetUpEvent event : mListOfEvents) {
                     mEventsData.add(createHashmap("event", event));

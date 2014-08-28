@@ -25,17 +25,25 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.HashMap;
+
+import meetup_objects.MUModel;
+import meetup_objects.MeetUpEvent;
+
 public class MapActivity extends Activity {
 	private MapFragment mMapFragment;
 	private GoogleMap mMap;
 	private MarkerOptions mLongClickMarkerOptions;
 	private Marker mCurrentMapMarker;
 	private View mLoadingSpinner;
+    private MURepository mEventsRepository;
+    private HashMap mShownEventMarkers = new HashMap();
 
-	@Override
+    @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
+        mEventsRepository = MURepository.getSingleton(MURepository.SINGLETON_KEYS.KEVENTS);
 		mMapFragment = ((MapFragment) getFragmentManager().findFragmentById(
 				R.id.mapview));
 		mMap = mMapFragment.getMap();
@@ -51,20 +59,66 @@ public class MapActivity extends Activity {
 		mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
 			@Override
 			public void onInfoWindowClick(Marker marker) {
-
-				Bundle bundle = new Bundle();
-				bundle.putDouble("lat", marker.getPosition().latitude);
-				bundle.putDouble("lon", marker.getPosition().longitude);
-				bundle.putString("address", marker.getSnippet());
-				MiscUtil.launchActivity(CreateEventActivity.class, bundle,
-						MapActivity.this);
+                if(mShownEventMarkers.containsValue(marker)) {
+                    //take user to events detail page
+                } else {
+                    Bundle bundle = new Bundle();
+                    bundle.putDouble("lat", marker.getPosition().latitude);
+                    bundle.putDouble("lon", marker.getPosition().longitude);
+                    bundle.putString("address", marker.getSnippet());
+                    MiscUtil.launchActivity(CreateEventActivity.class, bundle,
+                            MapActivity.this);
+                    marker.remove();
+                }
 			}
 		});
 		mMap.setMyLocationEnabled(true);
 		centerMapOnMyLocation();
+        showEvents();
 	}
 
-	private void addLocationMarker(LatLng point) {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showEvents();
+    }
+
+    private void showEvents() {
+        for(Object marker : mShownEventMarkers.values()) {
+            Marker mapMarker = (Marker)marker;
+            mapMarker.remove();
+        }
+
+        for(Object event : mEventsRepository.getItems().values()) {
+            MeetUpEvent muEvent = (MeetUpEvent)event;
+            if(muEvent.shouldShowOnMap()) {
+                showEvent(muEvent);
+            }
+        }
+    }
+
+    private void addMarker() {
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(new LatLng(43.63, -79.719));
+        markerOptions.title("some titme");
+        markerOptions.snippet("test ");
+        Marker marker = mMap.addMarker(markerOptions);
+    }
+
+    private void showEvent(MeetUpEvent muEvent) {
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(new LatLng(muEvent.getLatitude(), muEvent.getLongitude()));
+        markerOptions.title(muEvent.getName());
+        markerOptions.snippet("test ");
+        if(mShownEventMarkers.containsKey(muEvent.uniqueKey())) {
+            Marker marker = (Marker)mShownEventMarkers.get(muEvent.uniqueKey());
+            marker.remove();
+        }
+        Marker marker = mMap.addMarker(markerOptions);
+        mShownEventMarkers.put(muEvent.uniqueKey(), marker);
+    }
+
+    private void addLocationMarker(LatLng point) {
 		if (mCurrentMapMarker != null) {
 			mCurrentMapMarker.remove();
 		}
@@ -93,8 +147,9 @@ public class MapActivity extends Activity {
 			MiscUtil.launchActivity(SettingsActivity.class, null, this);
 			break;
         case R.id.action_logout:
-            SessionsUtil.destroyAccount(this);
-            finish();
+            addMarker();
+//            SessionsUtil.destroyAccount(this);
+//            finish();
 		}
 		return false;
 	}
@@ -103,14 +158,6 @@ public class MapActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.map_menu, menu);
 		return true;
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		if (!MiscUtil.isOnline(this)) {
-			DialogUtil.showNoInternetConnectionDialog(this);
-		}
 	}
 
 	@Override

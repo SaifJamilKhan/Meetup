@@ -123,7 +123,7 @@ public class CreateEventActivity extends Activity implements
                     }
                 }
                 MeetUpEvent event = new MeetUpEvent(mEventNameText.getText().toString(), mEventDescription.getText().toString(), mAddressText.getText().toString(),
-                                                    new Date((mTimeTimeSinceInSeconds + mDateTimeSinceInSeconds) * 1000), participants, mLatitude, mLatitude);
+                                                    new Date((mTimeTimeSinceInSeconds + mDateTimeSinceInSeconds) * 1000), participants, mLatitude, mLongitude);
                 try {
                     MeetUpEvent.JsonTimeSerializer timeSerializer = new MeetUpEvent.JsonTimeSerializer();
 
