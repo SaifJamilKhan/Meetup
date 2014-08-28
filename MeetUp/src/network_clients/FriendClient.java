@@ -55,12 +55,12 @@ public class FriendClient extends MUNetworkClient implements
 
     @Override
     public void requestFailedWithJSON(JSONObject object) {
-
+        mListener.requestFailedWithError();
     }
 
     @Override
     public void requestFailed(Exception e) {
-
+        mListener.requestFailedWithError();
     }
 
 }
