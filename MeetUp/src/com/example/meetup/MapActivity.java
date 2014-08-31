@@ -3,6 +3,7 @@ package com.example.meetup;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 
 import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.GoogleMapsUtil;
@@ -38,11 +40,16 @@ public class MapActivity extends Activity {
 	private View mLoadingSpinner;
     private MURepository mEventsRepository;
     private HashMap mShownEventMarkers = new HashMap();
-
+    private Button mTrackingButton;
+    private SharedPreferences mSharedPrefs;
+    private final String KIS_TRACKING = "is_tracking";
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
+        mTrackingButton = (Button)findViewById(R.id.tracking_button);
+        setUpTrackingButton();
+
         mEventsRepository = MURepository.getSingleton(MURepository.SINGLETON_KEYS.KEVENTS);
 		mMapFragment = ((MapFragment) getFragmentManager().findFragmentById(
 				R.id.mapview));
@@ -77,6 +84,31 @@ public class MapActivity extends Activity {
         showEvents();
 	}
 
+    private void setUpTrackingButton() {
+        mSharedPrefs = this.getSharedPreferences("Tracking",
+                Context.MODE_PRIVATE);
+        if (!mSharedPrefs.contains(KIS_TRACKING)) {
+            mSharedPrefs.edit().putBoolean(KIS_TRACKING, false).apply();
+        }
+        setTrackingTag(mSharedPrefs.getBoolean(KIS_TRACKING, false) ? 1 : 0);
+        mTrackingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean isTracking = !mSharedPrefs.getBoolean(KIS_TRACKING, false);
+                mSharedPrefs.edit().putBoolean(KIS_TRACKING, isTracking).apply();
+                setTrackingTag(isTracking ? 1 : 0);
+            }
+        });
+    }
+
+    private void setTrackingTag(Integer tag) {
+        mTrackingButton.setTag(tag);
+        if(tag == 0){
+            mTrackingButton.setText(R.string.tracking_button_start);
+        } else {
+            mTrackingButton.setText(R.string.tracking_button_stop);
+        }
+    }
     @Override
     protected void onResume() {
         super.onResume();

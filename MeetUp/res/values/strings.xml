@@ -32,7 +32,11 @@
      <string name="event_list_of_friends_label">Event List of Friends</string>
     <string name="event_show_on_map">Show on map</string>
     <string name="event_hide_on_map">Hide on map</string>
-    
+
+    <!-- Tracking Bar -->
+    <string name="tracking_button_start">Start Tracking</string>
+    <string name="tracking_button_stop">Stop Tracking</string>
+
     <!-- Emojis -->
     <string name="x">❌</string>
     <string name="check_mark">︎✔︎︎</string>
