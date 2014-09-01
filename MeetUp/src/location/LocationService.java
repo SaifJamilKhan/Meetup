@@ -1,6 +1,7 @@
 package location;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -34,6 +35,8 @@ public class LocationService extends Service implements
     private LocationRequest mLocationRequest;
     private Boolean servicesAvailable;
     private LocationClient mLocationClient;
+    private final String KIS_TRACKING = "is_tracking";
+    private SharedPreferences mSharedPrefs;
 
     public class LocalBinder extends Binder {
         public LocationService getServerInstance() {
@@ -64,12 +67,19 @@ public class LocationService extends Service implements
          * handle callbacks.
          */
         mLocationClient = new LocationClient(this, this, this);
+        mSharedPrefs = this.getSharedPreferences("Tracking",
+                Context.MODE_PRIVATE);
     }
 
     private class LocationTimer extends TimerTask {
 
         @Override
         public void run() {
+            if(!mSharedPrefs.contains(KIS_TRACKING) || !mSharedPrefs.getBoolean(KIS_TRACKING, false)) {
+                stopSelf();
+                return;
+            }
+
             if(!servicesAvailable || mLocationClient.isConnected() || mInProgress)
                 return;
 
@@ -78,6 +88,8 @@ public class LocationService extends Service implements
             {
                 mInProgress = true;
                 mLocationClient.connect();
+            } else {
+                mLocationClient.requestLocationUpdates(mLocationRequest, LocationService.this);
             }
 //            MyLocation.LocationResult locationResult = new MyLocation.LocationResult(){
 //                @Override
@@ -143,7 +155,6 @@ public class LocationService extends Service implements
     @Override
     public void onConnected(Bundle bundle) {
         mLocationClient.requestLocationUpdates(mLocationRequest, this);
-
     }
 
     @Override

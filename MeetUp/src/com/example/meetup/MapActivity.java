@@ -1,6 +1,8 @@
 package com.example.meetup;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,6 +31,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.HashMap;
 
+import location.LocationService;
 import meetup_objects.MUModel;
 import meetup_objects.MeetUpEvent;
 
@@ -97,8 +100,24 @@ public class MapActivity extends Activity {
                 boolean isTracking = !mSharedPrefs.getBoolean(KIS_TRACKING, false);
                 mSharedPrefs.edit().putBoolean(KIS_TRACKING, isTracking).apply();
                 setTrackingTag(isTracking ? 1 : 0);
+                if(isTracking) {
+                    if(!isMyServiceRunning(LocationService.class)) {
+                        ComponentName comp = new ComponentName(MapActivity.this.getPackageName(), LocationService.class.getName());
+                        MapActivity.this.startService(new Intent().setComponent(comp));
+                    }
+                }
             }
         });
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setTrackingTag(Integer tag) {
