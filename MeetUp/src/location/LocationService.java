@@ -1,10 +1,12 @@
 package location;
 
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -19,10 +21,14 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
+
+import providers.LocationProvider;
 
 public class LocationService extends Service implements
         GooglePlayServicesClient.ConnectionCallbacks,
@@ -91,14 +97,6 @@ public class LocationService extends Service implements
             } else {
                 mLocationClient.requestLocationUpdates(mLocationRequest, LocationService.this);
             }
-//            MyLocation.LocationResult locationResult = new MyLocation.LocationResult(){
-//                @Override
-//                public void gotLocation(Location location){
-//                    Log.v("", "got latitude: " + location.getLatitude() + " with long: " + location.getLongitude());
-//                }
-//            };
-//            MyLocation myLocation = new MyLocation();
-//            myLocation.getLocation(LocationService.this, locationResult);
         }
     }
 
@@ -136,10 +134,6 @@ public class LocationService extends Service implements
         super.onDestroy();
     }
 
-    public void startTracking() {
-
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mTimer.scheduleAtFixedRate(new LocationTimer(), KSECONDS_BETWEEN_LOCATIONS, KSECONDS_BETWEEN_LOCATIONS);
@@ -168,7 +162,25 @@ public class LocationService extends Service implements
     public void onLocationChanged(Location location) {
         String msg = Double.toString(location.getLatitude()) + "," +
                 Double.toString(location.getLongitude());
-        Log.d("meetup location", msg);
+        Log.d("adding meetup location", msg);
+        // Add a new student record
+        ContentValues values = new ContentValues();
+
+        values.put(LocationProvider.Columns.LATITUDE, location.getLatitude());
+        values.put(LocationProvider.Columns.LONGITUDE, location.getLatitude());
+
+        values.put(LocationProvider.Columns._USER_ID, 0);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date();
+
+        values.put(LocationProvider.Columns.RECORDED_AT, dateFormat.format(date));
+
+        Uri uri = getContentResolver().insert(
+                LocationProvider.CONTENT_URI, values);
+
+        Log.d("added meetup location", uri.toString());
+
     }
 
     @Override

@@ -135,7 +135,7 @@ public class EventsActivity extends Activity implements MURepository.MURepositor
 			if (text != null) {
                 if(data.get(position).containsKey("event")) {
                     final MeetUpEvent event = (MeetUpEvent)data.get(position).get("event");
-                    text.setText((CharSequence) event.getName());
+                    text.setText(event.getName());
 
                     final Button showOnMapButton = (Button)vi.findViewById(R.id.show_on_map_btn);
                     showOnMapButton.setText(event.shouldShowOnMap()? getString(R.string.event_hide_on_map) : getString(R.string.event_show_on_map));

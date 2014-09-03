@@ -88,8 +88,14 @@
         </activity>
 
         <provider
-            android:name="FriendProvider"
-            android:authorities="com.meetup.friendprovider"
+            android:name=".FriendProvider"
+            android:authorities="com.example.friendprovider"
+            android:exported="false" >
+        </provider>
+
+        <provider
+            android:name="providers.LocationProvider"
+            android:authorities="providers.LocationProvider"
             android:exported="false" >
         </provider>
 

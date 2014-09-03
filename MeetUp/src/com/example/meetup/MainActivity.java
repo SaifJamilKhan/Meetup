@@ -61,32 +61,6 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	// private ArrayList<Integer> quickSort(ArrayList<Integer> array, int left,
-	// int right) {
-	// if (left >= right)
-	// return array;
-	// int leftPosition = left + 1;
-	// int rightPosition = right;
-	//
-	// while (leftPosition <= rightPosition) {
-	// if (array.get(leftPosition) > array.get(left)) {
-	// while (rightPosition >= leftPosition) {
-	// if (array.get(rightPosition) < array.get(left)) {
-	// swap(leftPosition, rightPosition, array);
-	// break;
-	// }
-	// rightPosition--;
-	// }
-	// }
-	// leftPosition++;
-	// }
-	// swap(left, leftPosition - 1, array);
-	// quickSort(array, left, leftPosition - 2);
-	// quickSort(array, leftPosition, right);
-	//
-	// return array;
-	// }
-
 //	private void makeMeRequest() {
 //		Request request = Request.newMeRequest(ParseFacebookUtils.getSession(),
 //				new Request.GraphUserCallback() {

@@ -42,7 +42,6 @@
     </LinearLayout>
 
     <include
-        android:layout_width="wrap_content"
         layout="@layout/loading_spinner" />
 
 </RelativeLayout>
