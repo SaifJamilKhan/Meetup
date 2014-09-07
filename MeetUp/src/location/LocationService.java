@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.SyncStateContract;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -35,6 +36,8 @@ public class LocationService extends Service implements
         GooglePlayServicesClient.OnConnectionFailedListener,
         LocationListener {
 
+    final public static String KNEW_LOCATION = "new_location";
+    final public static String KLOCATION= "location";
     private int KSECONDS_BETWEEN_LOCATIONS = 3;
     private Timer mTimer;
     private boolean mInProgress;
@@ -53,6 +56,7 @@ public class LocationService extends Service implements
     @Override
     public void onCreate() {
         super.onCreate();
+        deleteOldLocations();
         mTimer = new Timer();
 
         mInProgress = false;
@@ -61,7 +65,7 @@ public class LocationService extends Service implements
         mLocationRequest = LocationRequest.create();
         // Use high accuracy
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        // Set the update interval to 5 seconds
+        // Set t`he update interval to 5 seconds
         mLocationRequest.setInterval(KSECONDS_BETWEEN_LOCATIONS);
         // Set the fastest update interval to 1 second
         mLocationRequest.setFastestInterval(1);
@@ -167,7 +171,7 @@ public class LocationService extends Service implements
         ContentValues values = new ContentValues();
 
         values.put(LocationProvider.Columns.LATITUDE, location.getLatitude());
-        values.put(LocationProvider.Columns.LONGITUDE, location.getLatitude());
+        values.put(LocationProvider.Columns.LONGITUDE, location.getLongitude());
 
         values.put(LocationProvider.Columns._USER_ID, 0);
 
@@ -180,7 +184,7 @@ public class LocationService extends Service implements
                 LocationProvider.CONTENT_URI, values);
 
         Log.d("added meetup location", uri.toString());
-
+        notifyLocationRecieved(location);
     }
 
     @Override
@@ -192,6 +196,16 @@ public class LocationService extends Service implements
         } else {
            //locations not happening
         }
+    }
 
+    private void deleteOldLocations() {
+        Uri locationsURI = Uri.parse(LocationProvider.URL);
+        getContentResolver().delete(locationsURI, null, null);
+    }
+
+    private void notifyLocationRecieved(Location location) {
+        Intent intent = new Intent(KNEW_LOCATION);
+        intent.putExtra(KLOCATION, location);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 }
