@@ -15,23 +15,6 @@ import java.util.HashMap;
 
 public class MeetUpEvent extends MUModel{
 
-    public static class JsonTimeSerializer implements com.google.gson.JsonSerializer<Date> {
-        @Override
-          public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext
-                context) {
-            return src == null ? null : new JsonPrimitive(src.getTime()/1000);
-        }
-
-    }
-
-    public static class JsonTimeDeserializer implements JsonDeserializer {
-
-        @Override
-        public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            return new Date(json.getAsInt() * 1000);
-        }
-    }
-
     public static class EventTableColumns {
 		public static String name = "event_name";
 		public static String id = "id";
@@ -145,4 +128,23 @@ public class MeetUpEvent extends MUModel{
     public void setShowOnMap(boolean showOnMap) {
         this.showOnMap = showOnMap;
     }
+
+
+    public static class JsonTimeSerializer implements com.google.gson.JsonSerializer<Date> {
+        @Override
+        public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext
+                context) {
+            return src == null ? null : new JsonPrimitive(src.getTime()/1000);
+        }
+
+    }
+
+    public static class JsonTimeDeserializer implements JsonDeserializer {
+
+        @Override
+        public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return new Date(json.getAsInt() * 1000);
+        }
+    }
+
 }
