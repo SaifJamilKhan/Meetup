@@ -12,10 +12,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
+import java.util.HashMap;
+
 public class LocationProvider extends ContentProvider{
 
-    static final String PROVIDER_NAME = "providers.LocationProvider";
-    static final String URL = "content://" + PROVIDER_NAME + "/locations";
+    public static final String PROVIDER_NAME = "providers.LocationProvider";
+    public static final String URL = "content://" + PROVIDER_NAME + "/locations";
     public static final Uri CONTENT_URI = Uri.parse(URL);
     static final UriMatcher uriMatcher;
 
@@ -79,6 +81,7 @@ public class LocationProvider extends ContentProvider{
         return (db == null) ? false : true;
     }
 
+    private static HashMap<String, String> LOCATIONS_PROJECTION_MAP;
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
@@ -89,6 +92,9 @@ public class LocationProvider extends ContentProvider{
         switch (uriMatcher.match(uri)) {
             case LOCATION_ID:
                 qb.appendWhere(Columns._ID + "=" + uri.getPathSegments().get(1));
+                break;
+            case LOCATIONS:
+                qb.setProjectionMap(LOCATIONS_PROJECTION_MAP);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
@@ -121,9 +127,22 @@ public class LocationProvider extends ContentProvider{
         }
         throw new SQLException("Failed to add a record into " + uri);
     }
+
     @Override
     public int delete(Uri uri, String s, String[] strings) {
-        return 0;
+
+        int uriType = uriMatcher.match(uri);
+        int rowsDeleted = 0;
+
+        switch (uriType) {
+            case LOCATIONS:
+                rowsDeleted = db.delete(LOCATIONS_TABLE_NAME, Columns.RECORDED_AT + "> ?", new String[]{"NOW() - INTERVAL 120 MINUTE"});
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowsDeleted;
     }
 
     @Override
