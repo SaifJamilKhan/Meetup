@@ -2,14 +2,23 @@ package com.example.meetup;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,12 +37,20 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import location.LocationService;
-import meetup_objects.MUModel;
 import meetup_objects.MeetUpEvent;
+import meetup_objects.MeetUpLocation;
+import providers.LocationProvider;
 
 public class MapActivity extends Activity {
 	private MapFragment mMapFragment;
@@ -46,6 +63,8 @@ public class MapActivity extends Activity {
     private Button mTrackingButton;
     private SharedPreferences mSharedPrefs;
     private final String KIS_TRACKING = "is_tracking";
+    private Polyline mCurrentUserPolyline;
+
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -103,13 +122,68 @@ public class MapActivity extends Activity {
                 if(isTracking) {
                     if(!isMyServiceRunning(LocationService.class)) {
                         ComponentName comp = new ComponentName(MapActivity.this.getPackageName(), LocationService.class.getName());
-                        MapActivity.this.startService(new Intent().setComponent(comp));
+                        startService(new Intent().setComponent(comp));
+                        LocalBroadcastManager.getInstance(MapActivity.this).registerReceiver(mMessageReceiver,
+                                new IntentFilter(LocationService.KNEW_LOCATION));
                     }
+                } else {
+                    LocalBroadcastManager.getInstance(MapActivity.this).unregisterReceiver(mMessageReceiver);
                 }
             }
         });
     }
 
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String message = intent.getStringExtra("message");
+            syncLocations();
+        }
+    };
+
+    private void syncLocations() {
+        Uri locationsURI = Uri.parse(LocationProvider.URL);
+        Cursor cursor = getContentResolver().query(locationsURI, null, null, null, null);
+        ArrayList<MeetUpLocation> locations = getAllLocations(cursor);
+        if(mCurrentUserPolyline != null) {
+            mCurrentUserPolyline.remove();
+        }
+        mCurrentUserPolyline = addLocationsToMap(locations);
+    }
+
+    private Polyline addLocationsToMap(ArrayList<MeetUpLocation> locations) {
+        // Polylines are useful for marking paths and routes on the map.
+        PolylineOptions polylineOptions = new PolylineOptions().geodesic(true);
+        for(MeetUpLocation location : locations) {
+            polylineOptions.add(new LatLng(location.getLatitude(), location.getLongitude()));
+        }
+        return mMap.addPolyline(polylineOptions);
+    }
+
+    private ArrayList<MeetUpLocation> getAllLocations(Cursor cursor) {
+        ArrayList<MeetUpLocation> locations = new ArrayList<MeetUpLocation>();
+        while(cursor.moveToNext()) {
+            MeetUpLocation location = new MeetUpLocation();
+            location.setLatitude(cursor.getDouble(cursor.getColumnIndex(LocationProvider.Columns.LATITUDE)));
+            location.setLongitude(cursor.getDouble(cursor.getColumnIndex(LocationProvider.Columns.LONGITUDE)));
+            location.setUserID(cursor.getInt(cursor.getColumnIndex(LocationProvider.Columns._USER_ID)));
+            String dateTime = cursor.getString(cursor.getColumnIndex(LocationProvider.Columns.RECORDED_AT));
+            try {
+                location.setRecordedAt(dateFromString(dateTime));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            locations.add(location);
+        }
+        return locations;
+    }
+
+    private Date dateFromString(String string) throws ParseException {
+        DateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = iso8601Format.parse(string);
+        return date;
+    }
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -128,6 +202,16 @@ public class MapActivity extends Activity {
             mTrackingButton.setText(R.string.tracking_button_stop);
         }
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(isMyServiceRunning(LocationService.class)) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                    new IntentFilter(LocationService.KNEW_LOCATION));
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -148,12 +232,10 @@ public class MapActivity extends Activity {
         }
     }
 
-    private void addMarker() {
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(new LatLng(43.63, -79.719));
-        markerOptions.title("some titme");
-        markerOptions.snippet("test ");
-        Marker marker = mMap.addMarker(markerOptions);
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(MapActivity.this).unregisterReceiver(mMessageReceiver);
     }
 
     private void showEvent(MeetUpEvent muEvent) {
@@ -198,9 +280,8 @@ public class MapActivity extends Activity {
 			MiscUtil.launchActivity(SettingsActivity.class, null, this);
 			break;
         case R.id.action_logout:
-            addMarker();
-//            SessionsUtil.destroyAccount(this);
-//            finish();
+            SessionsUtil.destroyAccount(this);
+            finish();
 		}
 		return false;
 	}
@@ -216,7 +297,7 @@ public class MapActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	private void centerMapOnMyLocation() {
+    private void centerMapOnMyLocation() {
 		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		Criteria criteria = new Criteria();
 
