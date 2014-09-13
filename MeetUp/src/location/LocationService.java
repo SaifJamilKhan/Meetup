@@ -10,25 +10,22 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.SyncStateContract;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Logger;
 
+import meetup_objects.MeetUpLocation;
 import providers.LocationProvider;
 
 public class LocationService extends Service implements
@@ -38,7 +35,7 @@ public class LocationService extends Service implements
 
     final public static String KNEW_LOCATION = "new_location";
     final public static String KLOCATION= "location";
-    private int KSECONDS_BETWEEN_LOCATIONS = 3;
+    private int KSECONDS_BETWEEN_LOCATIONS = 8000;
     private Timer mTimer;
     private boolean mInProgress;
     private LocationRequest mLocationRequest;
@@ -57,7 +54,6 @@ public class LocationService extends Service implements
     public void onCreate() {
         super.onCreate();
         deleteOldLocations();
-        mTimer = new Timer();
 
         mInProgress = false;
         // Create the LocationRequest object
@@ -134,16 +130,24 @@ public class LocationService extends Service implements
             // Destroy the current location client
             mLocationClient = null;
         }
-        mTimer.cancel();
+        if(mTimer != null) {
+            mTimer.cancel();
+            mTimer.purge();
+        }
         super.onDestroy();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if(mTimer != null) {
+            mTimer.cancel();
+            mTimer.purge();
+        }
+        mTimer = new Timer();
         mTimer.scheduleAtFixedRate(new LocationTimer(), KSECONDS_BETWEEN_LOCATIONS, KSECONDS_BETWEEN_LOCATIONS);
-        return super.onStartCommand(intent, flags, startId);
+        return super.
+                onStartCommand(intent, flags, startId);
     }
-
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -169,22 +173,20 @@ public class LocationService extends Service implements
         Log.d("adding meetup location", msg);
         // Add a new student record
         ContentValues values = new ContentValues();
-
-        values.put(LocationProvider.Columns.LATITUDE, location.getLatitude());
-        values.put(LocationProvider.Columns.LONGITUDE, location.getLongitude());
-
-        values.put(LocationProvider.Columns._USER_ID, 0);
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
 
-        values.put(LocationProvider.Columns.RECORDED_AT, dateFormat.format(date));
+        MeetUpLocation muLocation = new MeetUpLocation(location.getLatitude(), location.getLongitude(), 0, date);
 
+        values.put(LocationProvider.Columns.LATITUDE, location.getLatitude());
+        values.put(LocationProvider.Columns.LONGITUDE, location.getLongitude());
+        values.put(LocationProvider.Columns._USER_ID, 0);
+        values.put(LocationProvider.Columns.RECORDED_AT, dateFormat.format(date));
         Uri uri = getContentResolver().insert(
                 LocationProvider.CONTENT_URI, values);
 
         Log.d("added meetup location", uri.toString());
-        notifyLocationRecieved(location);
+        notifyLocationRecieved(muLocation);
     }
 
     @Override
@@ -203,7 +205,7 @@ public class LocationService extends Service implements
         getContentResolver().delete(locationsURI, null, null);
     }
 
-    private void notifyLocationRecieved(Location location) {
+    private void notifyLocationRecieved(MeetUpLocation location) {
         Intent intent = new Intent(KNEW_LOCATION);
         intent.putExtra(KLOCATION, location);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);

@@ -1,8 +1,5 @@
 package com.example.meetup;
 
-import java.util.Arrays;
-import java.util.List;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,7 +9,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 import com.example.meetup.Utils.DatabaseUtil;
-import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.MiscUtil;
 
 public class MainActivity extends Activity {
@@ -56,6 +52,7 @@ public class MainActivity extends Activity {
 		super.onResume();
 		if (mPreferences.contains("AuthToken")) {
 			MiscUtil.launchActivity(MapActivity.class, null, this);
+            finish();
 		} else {
 			// TODO: MAKE A FREAKING SPLASH SCREEN, ITS SUPER SIMPLE, DO IT
 		}
@@ -125,7 +122,7 @@ public class MainActivity extends Activity {
 		if (resultCode == Activity.RESULT_OK) {
 			// createGoogleUser();
 			// addUser();
-			launchMapActivity();
+            MiscUtil.launchActivity(MapActivity.class, null, this);
 		}
 		// } else {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -133,11 +130,4 @@ public class MainActivity extends Activity {
 
 		mLoadingSpinner.setVisibility(View.GONE);
 	}
-
-	private void launchMapActivity() {
-		Intent myIntent = new Intent(MainActivity.this, MapActivity.class);
-		MainActivity.this.startActivity(myIntent);
-		finish();
-	}
-
 }

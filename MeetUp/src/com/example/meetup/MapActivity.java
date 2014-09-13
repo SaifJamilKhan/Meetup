@@ -7,7 +7,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Criteria;
@@ -15,16 +14,12 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.GoogleMapsUtil;
 import com.example.meetup.Utils.MiscUtil;
 import com.example.meetup.Utils.SessionsUtil;
@@ -40,11 +35,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 import location.LocationService;
@@ -63,7 +54,8 @@ public class MapActivity extends Activity {
     private Button mTrackingButton;
     private SharedPreferences mSharedPrefs;
     private final String KIS_TRACKING = "is_tracking";
-    private Polyline mCurrentUserPolyline;
+    private ArrayList<Polyline> mCurrentUserPolylines = new ArrayList<Polyline>();
+    private ArrayList<MeetUpLocation> mLocations = new ArrayList<MeetUpLocation>();
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +118,7 @@ public class MapActivity extends Activity {
                         LocalBroadcastManager.getInstance(MapActivity.this).registerReceiver(mMessageReceiver,
                                 new IntentFilter(LocationService.KNEW_LOCATION));
                     }
+                    syncLocations();
                 } else {
                     LocalBroadcastManager.getInstance(MapActivity.this).unregisterReceiver(mMessageReceiver);
                 }
@@ -138,18 +131,32 @@ public class MapActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
             String message = intent.getStringExtra("message");
-            syncLocations();
+            MeetUpLocation newLocation = (MeetUpLocation)intent.getSerializableExtra(LocationService.KLOCATION);
+            addLocation(newLocation);
         }
     };
+
+    private void addLocation(MeetUpLocation location) {
+        mLocations.add(location);
+        if(mLocations.size() > 1) {
+            ArrayList<MeetUpLocation> lastTwo = new ArrayList<MeetUpLocation>();
+            lastTwo.add(mLocations.get(mLocations.size() -2));
+            lastTwo.add(mLocations.get(mLocations.size() -1));
+            mCurrentUserPolylines.add(addLocationsToMap(lastTwo));
+        }
+    }
 
     private void syncLocations() {
         Uri locationsURI = Uri.parse(LocationProvider.URL);
         Cursor cursor = getContentResolver().query(locationsURI, null, null, null, null);
-        ArrayList<MeetUpLocation> locations = getAllLocations(cursor);
-        if(mCurrentUserPolyline != null) {
-            mCurrentUserPolyline.remove();
+        mLocations = getAllLocations(cursor);
+        if(mCurrentUserPolylines != null) {
+            for(Polyline line : mCurrentUserPolylines)
+            {
+                line.remove();
+            }
         }
-        mCurrentUserPolyline = addLocationsToMap(locations);
+        mCurrentUserPolylines.add(addLocationsToMap(mLocations));
     }
 
     private Polyline addLocationsToMap(ArrayList<MeetUpLocation> locations) {
@@ -164,26 +171,12 @@ public class MapActivity extends Activity {
     private ArrayList<MeetUpLocation> getAllLocations(Cursor cursor) {
         ArrayList<MeetUpLocation> locations = new ArrayList<MeetUpLocation>();
         while(cursor.moveToNext()) {
-            MeetUpLocation location = new MeetUpLocation();
-            location.setLatitude(cursor.getDouble(cursor.getColumnIndex(LocationProvider.Columns.LATITUDE)));
-            location.setLongitude(cursor.getDouble(cursor.getColumnIndex(LocationProvider.Columns.LONGITUDE)));
-            location.setUserID(cursor.getInt(cursor.getColumnIndex(LocationProvider.Columns._USER_ID)));
-            String dateTime = cursor.getString(cursor.getColumnIndex(LocationProvider.Columns.RECORDED_AT));
-            try {
-                location.setRecordedAt(dateFromString(dateTime));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            MeetUpLocation location = new MeetUpLocation(cursor);
             locations.add(location);
         }
         return locations;
     }
 
-    private Date dateFromString(String string) throws ParseException {
-        DateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = iso8601Format.parse(string);
-        return date;
-    }
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
