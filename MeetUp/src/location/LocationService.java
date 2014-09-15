@@ -5,22 +5,29 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
+import com.example.meetup.MURepository;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,7 +42,7 @@ public class LocationService extends Service implements
 
     final public static String KNEW_LOCATION = "new_location";
     final public static String KLOCATION= "location";
-    private int KSECONDS_BETWEEN_LOCATIONS = 8000;
+    private int KSECONDS_BETWEEN_LOCATIONS = 10000;
     private Timer mTimer;
     private boolean mInProgress;
     private LocationRequest mLocationRequest;
@@ -43,12 +50,19 @@ public class LocationService extends Service implements
     private LocationClient mLocationClient;
     private final String KIS_TRACKING = "is_tracking";
     private SharedPreferences mSharedPrefs;
+    private MURepository mLocationsRepository;
 
     public class LocalBinder extends Binder {
         public LocationService getServerInstance() {
             return LocationService.this;
         }
     }
+
+    @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+    }
+
 
     @Override
     public void onCreate() {
@@ -168,10 +182,6 @@ public class LocationService extends Service implements
 
     @Override
     public void onLocationChanged(Location location) {
-        String msg = Double.toString(location.getLatitude()) + "," +
-                Double.toString(location.getLongitude());
-        Log.d("adding meetup location", msg);
-        // Add a new student record
         ContentValues values = new ContentValues();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
@@ -182,10 +192,10 @@ public class LocationService extends Service implements
         values.put(LocationProvider.Columns.LONGITUDE, location.getLongitude());
         values.put(LocationProvider.Columns._USER_ID, 0);
         values.put(LocationProvider.Columns.RECORDED_AT, dateFormat.format(date));
-        Uri uri = getContentResolver().insert(
+        values.put(LocationProvider.Columns.SENT_TO_SERVER, false);
+        getContentResolver().insert(
                 LocationProvider.CONTENT_URI, values);
 
-        Log.d("added meetup location", uri.toString());
         notifyLocationRecieved(muLocation);
     }
 
@@ -203,6 +213,25 @@ public class LocationService extends Service implements
     private void deleteOldLocations() {
         Uri locationsURI = Uri.parse(LocationProvider.URL);
         getContentResolver().delete(locationsURI, null, null);
+    }
+
+    private void sendLocationsToServer() {
+        Uri locationsURI = Uri.parse(LocationProvider.URL);
+        Cursor cursor = getContentResolver().query(locationsURI, null, "sent_to_server = ?", new String[1], null);
+        ArrayList<MeetUpLocation> locations = MeetUpLocation.getAllLocations(cursor);
+        mLocationsRepository = MURepository.getSingleton(MURepository.SINGLETON_KEYS.KLOCATIONS);
+
+        MeetUpLocation.JsonTimeSerializer timeSerializer = new MeetUpLocation.JsonTimeSerializer();
+
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Date.class, timeSerializer).create();
+
+        try {
+            mLocationsRepository.makePostRequest(new JSONObject(gson.toJson(locations)), this);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void notifyLocationRecieved(MeetUpLocation location) {

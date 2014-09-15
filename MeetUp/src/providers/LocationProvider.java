@@ -27,6 +27,7 @@ public class LocationProvider extends ContentProvider{
         public static final String LATITUDE = "latitude";
         public static final String LONGITUDE = "longitude";
         public static final String RECORDED_AT = "recorded_at";
+        public static final String SENT_TO_SERVER = "sent_to_server";
     }
 
     static final int LOCATIONS = 1;
@@ -47,7 +48,7 @@ public class LocationProvider extends ContentProvider{
     static final int DATABASE_VERSION = 1;
     static final String CREATE_DB_TABLE = " CREATE TABLE " + LOCATIONS_TABLE_NAME
             + " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " + " user_id LONG NOT NULL, " + " latitude FLOAT NOT NULL, "
-            + " longitude FLOAT NOT NULL, " + " recorded_at DATETIME NOT NULL);";
+            + " longitude FLOAT NOT NULL, " + " recorded_at DATETIME NOT NULL," +  "sent_to_server BOOL);";
 
     /**
      * Helper class that actually creates and manages the provider's underlying
@@ -130,13 +131,12 @@ public class LocationProvider extends ContentProvider{
 
     @Override
     public int delete(Uri uri, String s, String[] strings) {
-
         int uriType = uriMatcher.match(uri);
         int rowsDeleted = 0;
 
         switch (uriType) {
             case LOCATIONS:
-                rowsDeleted = db.delete(LOCATIONS_TABLE_NAME, Columns.RECORDED_AT + "> ?", new String[]{"NOW() - INTERVAL 120 MINUTE"});
+                rowsDeleted = db.delete(LOCATIONS_TABLE_NAME, Columns.RECORDED_AT + "< ?", new String[]{"DATEADD(mi,-120,GETDATE())"});
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);

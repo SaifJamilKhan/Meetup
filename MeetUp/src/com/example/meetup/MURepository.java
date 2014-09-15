@@ -4,23 +4,20 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.HashMap;
+import com.example.meetup.Utils.SessionsUtil;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.HttpParams;
 import org.json.JSONObject;
 
-import com.example.meetup.NetworkRequestUtil.NetworkRequestListener;
-import com.example.meetup.Utils.SessionsUtil;
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import meetup_objects.AppUserInfo;
 import meetup_objects.MUModel;
 import network_clients.EventsClient;
 import network_clients.FriendClient;
+import network_clients.LocationClient;
 import network_clients.MUNetworkClient;
 
 public class MURepository implements MUNetworkClient.MUNetworkClientListener {
@@ -32,22 +29,37 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
 
     private MUNetworkClient mClient;
     private HashMap items = new HashMap();
+    private interface PresistanceManager {
+        public void saveModels(ArrayList<MUModel> models);
+    }
 
+    private PresistanceManager mPresistanceManager;
     public HashMap getItems() {
         return items;
     }
 
     public enum SINGLETON_KEYS {
-		KFRIENDS(new FriendClient()), KEVENTS(new EventsClient());
-		private MUNetworkClient client;
+		KFRIENDS(new FriendClient(), null), KEVENTS(new EventsClient(), null),
+        KLOCATIONS(new LocationClient(), new PresistanceManager() {
+            @Override
+            public void saveModels(ArrayList<MUModel> models) {
 
-		SINGLETON_KEYS(MUNetworkClient path) {
+            }
+        });
+		private MUNetworkClient client;
+        private PresistanceManager presistanceManager;
+
+        SINGLETON_KEYS(MUNetworkClient path, PresistanceManager manager) {
 			this.client = path;
+            this.presistanceManager = manager;
 		}
 
 		public MUNetworkClient getNetworkClient() {
 			return client;
 		}
+        public PresistanceManager getPresistanceManager() {
+            return presistanceManager;
+        }
 	}
 
 	public static MURepository getSingleton(SINGLETON_KEYS key) {

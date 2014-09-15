@@ -131,8 +131,9 @@ public class MapActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
             String message = intent.getStringExtra("message");
-            MeetUpLocation newLocation = (MeetUpLocation)intent.getSerializableExtra(LocationService.KLOCATION);
-            addLocation(newLocation);
+//            MeetUpLocation newLocation = (MeetUpLocation)intent.getSerializableExtra(LocationService.KLOCATION);
+//            addLocation(newLocation);
+            syncLocations();
         }
     };
 
@@ -149,12 +150,13 @@ public class MapActivity extends Activity {
     private void syncLocations() {
         Uri locationsURI = Uri.parse(LocationProvider.URL);
         Cursor cursor = getContentResolver().query(locationsURI, null, null, null, null);
-        mLocations = getAllLocations(cursor);
+        mLocations = MeetUpLocation.getAllLocations(cursor);
         if(mCurrentUserPolylines != null) {
             for(Polyline line : mCurrentUserPolylines)
             {
                 line.remove();
             }
+            mCurrentUserPolylines.clear();
         }
         mCurrentUserPolylines.add(addLocationsToMap(mLocations));
     }
@@ -166,15 +168,6 @@ public class MapActivity extends Activity {
             polylineOptions.add(new LatLng(location.getLatitude(), location.getLongitude()));
         }
         return mMap.addPolyline(polylineOptions);
-    }
-
-    private ArrayList<MeetUpLocation> getAllLocations(Cursor cursor) {
-        ArrayList<MeetUpLocation> locations = new ArrayList<MeetUpLocation>();
-        while(cursor.moveToNext()) {
-            MeetUpLocation location = new MeetUpLocation(cursor);
-            locations.add(location);
-        }
-        return locations;
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -203,6 +196,7 @@ public class MapActivity extends Activity {
             LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                     new IntentFilter(LocationService.KNEW_LOCATION));
         }
+        syncLocations();
     }
 
     @Override

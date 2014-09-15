@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import providers.LocationProvider;
@@ -16,6 +17,7 @@ public class MeetUpLocation extends MUModel implements Serializable{
     private Double mLatitude;
     private Double mLongitude;
     private Date mRecordedAt;
+    private Boolean sentToServer;
 
     public MeetUpLocation (Double latitude, Double longitude, Number userID, Date recordedAt){
         mLatitude = latitude;
@@ -24,9 +26,19 @@ public class MeetUpLocation extends MUModel implements Serializable{
         mRecordedAt = recordedAt;
     }
 
+    public static ArrayList<MeetUpLocation> getAllLocations(Cursor cursor) {
+        ArrayList<MeetUpLocation> locations = new ArrayList<MeetUpLocation>();
+        while(cursor.moveToNext()) {
+            MeetUpLocation location = new MeetUpLocation(cursor);
+            locations.add(location);
+        }
+        return locations;
+    }
+
     public MeetUpLocation (Cursor cursor) {
         mLatitude = cursor.getDouble(cursor.getColumnIndex(LocationProvider.Columns.LATITUDE));
         mLongitude = cursor.getDouble(cursor.getColumnIndex(LocationProvider.Columns.LONGITUDE));
+        sentToServer = cursor.getInt(cursor.getColumnIndex(LocationProvider.Columns.SENT_TO_SERVER)) == 1;
         mUserID = cursor.getInt(cursor.getColumnIndex(LocationProvider.Columns._USER_ID));
         String dateTime = cursor.getString(cursor.getColumnIndex(LocationProvider.Columns.RECORDED_AT));
         try {
@@ -84,5 +96,13 @@ public class MeetUpLocation extends MUModel implements Serializable{
 
     public void setRecordedAt(Date mRecordedAt) {
         this.mRecordedAt = mRecordedAt;
+    }
+
+    public Boolean getSentToServer() {
+        return sentToServer;
+    }
+
+    public void setSentToServer(Boolean sentToServer) {
+        this.sentToServer = sentToServer;
     }
 }
