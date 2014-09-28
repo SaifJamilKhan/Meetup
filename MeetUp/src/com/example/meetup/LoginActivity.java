@@ -1,11 +1,5 @@
 package com.example.meetup;
 
-import network_clients.SessionsClient;
-import network_clients.SessionsClient.LoginResponse;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,6 +14,12 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.example.meetup.Utils.MiscUtil;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import network_clients.SessionsClient;
+import network_clients.SessionsClient.LoginResponse;
 
 public class LoginActivity extends Activity implements SessionsClient.SessionsClientListener {
 
@@ -105,8 +105,14 @@ public class LoginActivity extends Activity implements SessionsClient.SessionsCl
 
 	@Override
 	public void requestFailedWithError() {
-		mSpinner.setVisibility(View.INVISIBLE);
-		Toast.makeText(this, "Unexpected error, check internet!",
-				Toast.LENGTH_SHORT).show();
+        this.runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                mSpinner.setVisibility(View.INVISIBLE);
+                Toast.makeText(LoginActivity.this, "Unexpected error, check internet!",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
 	}
 }
