@@ -8,6 +8,7 @@ import com.example.meetup.Utils.SessionsUtil;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -76,6 +77,10 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
 	}
 
     public void makePostRequest(JSONObject body, Context context) {
+        mClient.postToServer(body, authenticationParameters(context));
+    }
+
+    public void makePostRequest(JSONArray body, Context context) {
         mClient.postToServer(body, authenticationParameters(context));
     }
 

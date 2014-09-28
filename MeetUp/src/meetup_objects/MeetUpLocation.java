@@ -1,5 +1,8 @@
 package meetup_objects;
+
 import android.database.Cursor;
+
+import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -12,11 +15,11 @@ import providers.LocationProvider;
 
 public class MeetUpLocation extends MUModel implements Serializable{
 
-    private String mID;
-    private Number mUserID;
-    private Double mLatitude;
-    private Double mLongitude;
-    private Date mRecordedAt;
+    @SerializedName("id")private String mID = null;
+    @SerializedName("user_id")private Number mUserID;
+    @SerializedName("latitude")private Double mLatitude;
+    @SerializedName("longitude")private Double mLongitude;
+    @SerializedName("recorded_at")private Date mRecordedAt;
     private Boolean sentToServer;
 
     public MeetUpLocation (Double latitude, Double longitude, Number userID, Date recordedAt){
@@ -55,7 +58,7 @@ public class MeetUpLocation extends MUModel implements Serializable{
     }
     @Override
     public String uniqueKey() {
-        return null;
+        return mID;
     }
 
     public String getID() {

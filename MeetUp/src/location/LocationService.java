@@ -23,8 +23,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -179,9 +179,11 @@ public class LocationService extends Service implements
         // Destroy the current location client
         mLocationClient = null;
     }
-
+    long lastUpdateInSeconds = 0;
     @Override
     public void onLocationChanged(Location location) {
+        if((System.currentTimeMillis() - lastUpdateInSeconds) < 5000) return;
+        lastUpdateInSeconds = System.currentTimeMillis();
         ContentValues values = new ContentValues();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
@@ -192,10 +194,10 @@ public class LocationService extends Service implements
         values.put(LocationProvider.Columns.LONGITUDE, location.getLongitude());
         values.put(LocationProvider.Columns._USER_ID, 0);
         values.put(LocationProvider.Columns.RECORDED_AT, dateFormat.format(date));
-        values.put(LocationProvider.Columns.SENT_TO_SERVER, false);
+        values.put(LocationProvider.Columns.SENT_TO_SERVER, 0);
         getContentResolver().insert(
                 LocationProvider.CONTENT_URI, values);
-
+        sendLocationsToServer();
         notifyLocationRecieved(muLocation);
     }
 
@@ -217,8 +219,11 @@ public class LocationService extends Service implements
 
     private void sendLocationsToServer() {
         Uri locationsURI = Uri.parse(LocationProvider.URL);
-        Cursor cursor = getContentResolver().query(locationsURI, null, "sent_to_server = ?", new String[1], null);
+        String[] args = new String[1];
+        args[0] = "0";
+        Cursor cursor = getContentResolver().query(locationsURI, null, "sent_to_server = ?", args, null);
         ArrayList<MeetUpLocation> locations = MeetUpLocation.getAllLocations(cursor);
+
         mLocationsRepository = MURepository.getSingleton(MURepository.SINGLETON_KEYS.KLOCATIONS);
 
         MeetUpLocation.JsonTimeSerializer timeSerializer = new MeetUpLocation.JsonTimeSerializer();
@@ -227,7 +232,7 @@ public class LocationService extends Service implements
                 .registerTypeAdapter(Date.class, timeSerializer).create();
 
         try {
-            mLocationsRepository.makePostRequest(new JSONObject(gson.toJson(locations)), this);
+            mLocationsRepository.makePostRequest(new JSONArray(gson.toJson(locations)), this);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -238,5 +243,6 @@ public class LocationService extends Service implements
         Intent intent = new Intent(KNEW_LOCATION);
         intent.putExtra(KLOCATION, location);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        stopSelf();
     }
 }

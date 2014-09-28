@@ -104,13 +104,11 @@ public class MapActivity extends Activity {
         if (!mSharedPrefs.contains(KIS_TRACKING)) {
             mSharedPrefs.edit().putBoolean(KIS_TRACKING, false).apply();
         }
-        setTrackingTag(mSharedPrefs.getBoolean(KIS_TRACKING, false) ? 1 : 0);
+        mSharedPrefs.edit().putBoolean(KIS_TRACKING, false).apply();
         mTrackingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                boolean isTracking = !mSharedPrefs.getBoolean(KIS_TRACKING, false);
-                mSharedPrefs.edit().putBoolean(KIS_TRACKING, isTracking).apply();
-                setTrackingTag(isTracking ? 1 : 0);
+                boolean isTracking = switchIsTracking();
                 if(isTracking) {
                     if(!isMyServiceRunning(LocationService.class)) {
                         ComponentName comp = new ComponentName(MapActivity.this.getPackageName(), LocationService.class.getName());
@@ -118,22 +116,31 @@ public class MapActivity extends Activity {
                         LocalBroadcastManager.getInstance(MapActivity.this).registerReceiver(mMessageReceiver,
                                 new IntentFilter(LocationService.KNEW_LOCATION));
                     }
-                    syncLocations();
+                    mTrackingButton.setEnabled(false);
                 } else {
                     LocalBroadcastManager.getInstance(MapActivity.this).unregisterReceiver(mMessageReceiver);
                 }
             }
         });
     }
+    private boolean switchIsTracking() {
+        boolean isTracking = !mSharedPrefs.getBoolean(KIS_TRACKING, false);
+        mSharedPrefs.edit().putBoolean(KIS_TRACKING, isTracking).apply();
+        setTrackingTag(isTracking ? 1 : 0);
+        return isTracking;
+    }
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
-            String message = intent.getStringExtra("message");
-//            MeetUpLocation newLocation = (MeetUpLocation)intent.getSerializableExtra(LocationService.KLOCATION);
-//            addLocation(newLocation);
-            syncLocations();
+            MeetUpLocation newLocation = (MeetUpLocation)intent.getSerializableExtra(LocationService.KLOCATION);
+            if(newLocation != null) {
+                addLocation(newLocation);
+            }
+            switchIsTracking();
+            setTrackingTag(0);
+            mTrackingButton.setEnabled(true);
         }
     };
 
@@ -162,7 +169,6 @@ public class MapActivity extends Activity {
     }
 
     private Polyline addLocationsToMap(ArrayList<MeetUpLocation> locations) {
-        // Polylines are useful for marking paths and routes on the map.
         PolylineOptions polylineOptions = new PolylineOptions().geodesic(true);
         for(MeetUpLocation location : locations) {
             polylineOptions.add(new LatLng(location.getLatitude(), location.getLongitude()));

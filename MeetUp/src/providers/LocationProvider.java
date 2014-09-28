@@ -48,7 +48,7 @@ public class LocationProvider extends ContentProvider{
     static final int DATABASE_VERSION = 1;
     static final String CREATE_DB_TABLE = " CREATE TABLE " + LOCATIONS_TABLE_NAME
             + " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " + " user_id LONG NOT NULL, " + " latitude FLOAT NOT NULL, "
-            + " longitude FLOAT NOT NULL, " + " recorded_at DATETIME NOT NULL," +  "sent_to_server BOOL);";
+            + " longitude FLOAT NOT NULL, " + " recorded_at DATETIME NOT NULL," +  "sent_to_server INTEGER);";
 
     /**
      * Helper class that actually creates and manages the provider's underlying

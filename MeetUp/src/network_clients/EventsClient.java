@@ -8,17 +8,16 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.http.NameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.logging.Logger;
 
 import meetup_objects.MUModel;
 import meetup_objects.MeetUpEvent;
-import meetup_objects.MeetUpUser;
 
 
 public class EventsClient extends MUNetworkClient implements
@@ -34,6 +33,18 @@ public class EventsClient extends MUNetworkClient implements
     @Override
     public void postWithParameters(NetworkRequestUtil.NetworkRequestListener listener, JSONObject body, ArrayList<NameValuePair> parameters) {
         NetworkRequestUtil.makePostRequest(mPath, this, body, parameters);
+    }
+
+    @Override
+    public void postToServer(JSONArray body, ArrayList<NameValuePair> parameters) {
+        JSONObject events = new JSONObject();
+        try {
+            events.put("events", events);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        NetworkRequestUtil.makePostRequest(mPath, this, events, parameters);
     }
     //Network Request Listener
 

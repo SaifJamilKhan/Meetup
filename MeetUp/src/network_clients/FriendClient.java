@@ -5,13 +5,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.http.NameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import meetup_objects.MUModel;
 import meetup_objects.MeetUpUser;
 
 
@@ -28,6 +28,11 @@ public class FriendClient extends MUNetworkClient implements
     @Override
     protected void postWithParameters(NetworkRequestUtil.NetworkRequestListener listener, JSONObject body, ArrayList<NameValuePair> parameters) {
         NetworkRequestUtil.makePostRequest(mPath, this, body, parameters);
+    }
+
+    @Override
+    public void postToServer(JSONArray body, ArrayList<NameValuePair> parameters) {//currently no post for friends
+
     }
 
     //Network Request Listener

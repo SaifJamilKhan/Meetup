@@ -3,7 +3,7 @@ package network_clients;
 import com.example.meetup.NetworkRequestUtil;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.params.HttpParams;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -37,4 +37,6 @@ public abstract class MUNetworkClient implements NetworkRequestUtil.NetworkReque
     public void postToServer(JSONObject body, ArrayList<NameValuePair> parameters) {
         this.postWithParameters(this, body, parameters);
     }
+
+    public abstract void postToServer(JSONArray body, ArrayList<NameValuePair> parameters);
 }

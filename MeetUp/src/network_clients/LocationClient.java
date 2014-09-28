@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.http.NameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,6 +33,17 @@ public class LocationClient extends MUNetworkClient implements
     public void postWithParameters(NetworkRequestUtil.NetworkRequestListener listener, JSONObject body, ArrayList<NameValuePair> parameters) {
         NetworkRequestUtil.makePostRequest(mPath, this, body, parameters);
     }
+
+    @Override
+    public void postToServer(JSONArray body, ArrayList<NameValuePair> parameters) {
+        JSONObject locations = new JSONObject();
+        try {
+            locations.put("locations", body);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        NetworkRequestUtil.makePostRequest(mPath, this, locations, parameters);
+    }
     //Network Request Listener
 
     @Override
@@ -42,6 +54,7 @@ public class LocationClient extends MUNetworkClient implements
             if(object.has("locations")) {
                 Type listType = new TypeToken<ArrayList<MeetUpLocation>>() {
                 }.getType();
+
                 MeetUpLocation.JsonTimeDeserializer timeDeserializer = new MeetUpLocation.JsonTimeDeserializer();
 
                 Gson gson = new GsonBuilder()

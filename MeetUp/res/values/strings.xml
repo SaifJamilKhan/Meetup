@@ -34,8 +34,8 @@
     <string name="event_hide_on_map">Hide on map</string>
 
     <!-- Tracking Bar -->
-    <string name="tracking_button_start">Start Tracking</string>
-    <string name="tracking_button_stop">Stop Tracking</string>
+    <string name="tracking_button_start">Send Location</string>
+    <string name="tracking_button_stop">Sending</string>
 
     <!-- Emojis -->
     <string name="x">❌</string>
