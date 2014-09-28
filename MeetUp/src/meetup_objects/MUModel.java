@@ -28,7 +28,7 @@ public abstract class MUModel {
 
         @Override
         public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            return new Date(json.getAsInt() * 1000);
+            return new Date(json.getAsLong() * 1000);
         }
     }
 
