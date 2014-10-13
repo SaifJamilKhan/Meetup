@@ -92,6 +92,14 @@ public class MURepository implements MUNetworkClient.MUNetworkClientListener {
         mClient.syncWithServer(body, authenticationParameters(context));
     }
 
+
+    public void makeSyncRequest(Context context, ArrayList<NameValuePair> additionalParameters) {
+        ArrayList<NameValuePair> params = authenticationParameters(context);
+        params.addAll(additionalParameters);
+        mClient.syncWithServer(params);
+    }
+
+
     public ArrayList<NameValuePair> authenticationParameters(Context context){
         ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
         AppUserInfo user = SessionsUtil.getUser(context);

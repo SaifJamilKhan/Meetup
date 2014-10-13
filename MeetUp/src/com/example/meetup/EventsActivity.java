@@ -1,28 +1,11 @@
 package com.example.meetup;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import meetup_objects.AppUserInfo;
-import meetup_objects.MUModel;
-import meetup_objects.MeetUpEvent;
-import meetup_objects.MeetUpUser;
-
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -32,17 +15,15 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.example.meetup.Utils.DatabaseUtil;
-import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.MiscUtil;
-import com.example.meetup.Utils.PhoneContactsUtil;
-import com.example.meetup.Utils.SessionsUtil;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import meetup_objects.MUModel;
+import meetup_objects.MeetUpEvent;
 
 public class EventsActivity extends Activity implements MURepository.MURepositoryObserver {
 
@@ -148,6 +129,7 @@ public class EventsActivity extends Activity implements MURepository.MURepositor
                             } else {
                                 showOnMapButton.setText(getString(R.string.event_show_on_map));
                             }
+                            mRepository.getItems().put(event.uniqueKey(), event);
                         }
                     });
                 }

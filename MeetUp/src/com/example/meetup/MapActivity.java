@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -20,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.meetup.Utils.DialogUtil;
 import com.example.meetup.Utils.GoogleMapsUtil;
 import com.example.meetup.Utils.MiscUtil;
 import com.example.meetup.Utils.SessionsUtil;
@@ -34,6 +36,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +61,9 @@ public class MapActivity extends Activity {
     private final String KIS_TRACKING = "is_tracking";
     private ArrayList<Polyline> mCurrentUserPolylines = new ArrayList<Polyline>();
     private ArrayList<MeetUpLocation> mLocations = new ArrayList<MeetUpLocation>();
+    private Button mSyncWithServer;
+    private MURepository mLocationsRepository;
+    private HashMap mAddedEvents = new HashMap();
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +71,12 @@ public class MapActivity extends Activity {
 		setContentView(R.layout.activity_map);
         mTrackingButton = (Button)findViewById(R.id.tracking_button);
         setUpTrackingButton();
+        mSyncWithServer = (Button)findViewById(R.id.sync_with_server_button);
+        setUpSyncServerButton();
 
         mEventsRepository = MURepository.getSingleton(MURepository.SINGLETON_KEYS.KEVENTS);
+        mLocationsRepository = MURepository.getSingleton(MURepository.SINGLETON_KEYS.KLOCATIONS);
+
 		mMapFragment = ((MapFragment) getFragmentManager().findFragmentById(
 				R.id.mapview));
 		mMap = mMapFragment.getMap();
@@ -97,6 +109,22 @@ public class MapActivity extends Activity {
 		centerMapOnMyLocation();
         showEvents();
 	}
+
+    private void setUpSyncServerButton() {
+        mSyncWithServer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mLocationsRepository.makeSyncRequest(MapActivity.this, getEventIDParams());
+            }
+        });
+    }
+
+    private ArrayList<NameValuePair> getEventIDParams() {
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("event_id", )
+        return null;
+    }
+
 
     private void setUpTrackingButton() {
         mSharedPrefs = this.getSharedPreferences("Tracking",
@@ -212,6 +240,7 @@ public class MapActivity extends Activity {
     }
 
     private void showEvents() {
+        mAddedEvents.clear();
         for(Object marker : mShownEventMarkers.values()) {
             Marker mapMarker = (Marker)marker;
             mapMarker.remove();
@@ -225,13 +254,8 @@ public class MapActivity extends Activity {
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        LocalBroadcastManager.getInstance(MapActivity.this).unregisterReceiver(mMessageReceiver);
-    }
-
     private void showEvent(MeetUpEvent muEvent) {
+        mAddedEvents.put(muEvent.uniqueKey(), muEvent);
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(new LatLng(muEvent.getLatitude(), muEvent.getLongitude()));
         markerOptions.title(muEvent.getName());
@@ -242,6 +266,12 @@ public class MapActivity extends Activity {
         }
         Marker marker = mMap.addMarker(markerOptions);
         mShownEventMarkers.put(muEvent.uniqueKey(), marker);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(MapActivity.this).unregisterReceiver(mMessageReceiver);
     }
 
     private void addLocationMarker(LatLng point) {
@@ -273,10 +303,15 @@ public class MapActivity extends Activity {
 			MiscUtil.launchActivity(SettingsActivity.class, null, this);
 			break;
         case R.id.action_logout:
-            SessionsUtil.destroyAccount(this);
-            finish();
-		}
-		return false;
+            DialogUtil.showOkDialog("Logout", "Are you sure you want to log out?", this, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    SessionsUtil.destroyAccount(MapActivity.this);
+                    MapActivity.this.finish();
+                }
+            });
+        }
+        return false;
 	}
 
 	@Override

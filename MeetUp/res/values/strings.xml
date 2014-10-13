@@ -36,6 +36,7 @@
     <!-- Tracking Bar -->
     <string name="tracking_button_start">Send Location</string>
     <string name="tracking_button_stop">Sending</string>
+    <string name="server_sync_button">Server Sync</string>
 
     <!-- Emojis -->
     <string name="x">❌</string>

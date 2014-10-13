@@ -26,7 +26,7 @@ public class LocationClient extends MUNetworkClient implements
 
     @Override
     protected void syncRequestWithParameters(NetworkRequestUtil.NetworkRequestListener listener, JSONObject body, ArrayList<NameValuePair> parameters) {
-
+        NetworkRequestUtil.makeGetRequest(mPath, listener, parameters);
     }
 
     @Override
@@ -44,11 +44,10 @@ public class LocationClient extends MUNetworkClient implements
         }
         NetworkRequestUtil.makePostRequest(mPath, this, locations, parameters);
     }
-    //Network Request Listener
 
+    //Network Request Listener
     @Override
     public void requestSucceededWithJSON(JSONObject object) {
-
         try {
             ArrayList<MeetUpLocation> locationsArray = new ArrayList<MeetUpLocation>();
             if(object.has("locations")) {
