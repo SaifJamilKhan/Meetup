@@ -63,8 +63,8 @@ public class MapActivity extends Activity {
     private ArrayList<MeetUpLocation> mLocations = new ArrayList<MeetUpLocation>();
     private Button mSyncWithServer;
     private MURepository mLocationsRepository;
-    private HashMap mAddedEvents = new HashMap();
-
+//    private HashMap mAddedEvents = new HashMap();
+    private MeetUpEvent currentlyShowingEvent;
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -121,7 +121,7 @@ public class MapActivity extends Activity {
 
     private ArrayList<NameValuePair> getEventIDParams() {
         ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-        params.add(new BasicNameValuePair("event_id", )
+        params.add(new BasicNameValuePair("event_id", currentlyShowingEvent.getID()));
         return null;
     }
 
@@ -240,7 +240,6 @@ public class MapActivity extends Activity {
     }
 
     private void showEvents() {
-        mAddedEvents.clear();
         for(Object marker : mShownEventMarkers.values()) {
             Marker mapMarker = (Marker)marker;
             mapMarker.remove();
@@ -255,7 +254,7 @@ public class MapActivity extends Activity {
     }
 
     private void showEvent(MeetUpEvent muEvent) {
-        mAddedEvents.put(muEvent.uniqueKey(), muEvent);
+        currentlyShowingEvent = muEvent;
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(new LatLng(muEvent.getLatitude(), muEvent.getLongitude()));
         markerOptions.title(muEvent.getName());
@@ -333,7 +332,6 @@ public class MapActivity extends Activity {
 				.getLastKnownLocation(locationManager.getBestProvider(criteria,
 						false));
 		if (location != null) {
-
 			mMap.setMyLocationEnabled(true);
 			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(
 					location.getLatitude(), location.getLongitude()), 13));
