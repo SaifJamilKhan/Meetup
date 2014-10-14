@@ -28,7 +28,7 @@ import java.util.ArrayList;
 public class NetworkRequestUtil {
     // private static String baseUrl = "http://meet-up-server.herokuapp.com/";
 
-    private static String baseUrl = "http://142.1.62.130:3000/";
+    private static String baseUrl = "http://meetuprails.herokuapp.com/";
 
     public static interface NetworkRequestListener {
 
